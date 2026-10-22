@@ -1,0 +1,48 @@
+import { APP_ENV, ODIN_ORIGINS } from '../config';
+import type { AddStatus } from '../hooks/useAddAccount';
+
+interface Props {
+  status: AddStatus;
+  onAdd: () => void;
+  onRefresh: () => void;
+  refreshing: boolean;
+  hasAccounts: boolean;
+}
+
+const ADD_LABEL: Record<AddStatus, string> = {
+  restoring: 'Loading…',
+  idle: '+ Add account',
+  connecting: 'Waiting for Odin…',
+  saving: 'Saving…',
+};
+
+export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Props) {
+  const origin = ODIN_ORIGINS[APP_ENV];
+  return (
+    <header className="app-header">
+      <div className="title-block">
+        <h1>
+          Odin Portfolio
+          {APP_ENV !== 'prod' ? <span className="env-badge">{APP_ENV}</span> : null}
+        </h1>
+        <p className="muted small">
+          Connect as many Odin logins as you like. To add another, switch account on{' '}
+          <a href={origin} target="_blank" rel="noreferrer">
+            {origin.replace(/^https?:\/\//, '')}
+          </a>{' '}
+          first.
+        </p>
+      </div>
+      <div className="header-controls">
+        {hasAccounts ? (
+          <button className="btn btn-outline" onClick={onRefresh} disabled={refreshing}>
+            {refreshing ? 'Refreshing…' : 'Refresh'}
+          </button>
+        ) : null}
+        <button className="btn btn-primary" onClick={onAdd} disabled={status !== 'idle'}>
+          {ADD_LABEL[status]}
+        </button>
+      </div>
+    </header>
+  );
+}
