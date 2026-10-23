@@ -27,11 +27,16 @@ export function AggregatedTokenCard({ token, btcUsd }: Props) {
           {formatCompactAmount(token.balance, tokenPlaces(token), { abbreviate: true })}
         </div>
         {change !== null ? (
-          <span className={`pct ${change >= 0 ? 'pct-up' : 'pct-down'}`}>{formatPct(change)}</span>
+          <span className={`pct ${change >= 0 ? 'pct-up' : 'pct-down'}`}>
+            <span className="pct-glyph" aria-hidden="true">
+              {change >= 0 ? '▲' : '▼'}
+            </span>
+            {formatPct(change)}
+          </span>
         ) : null}
       </div>
       <ValueStack msats={token.valueMsats} btcUsd={btcUsd} />
-      <div className="muted small">
+      <div className="subtle small">
         held by {n} account{n === 1 ? '' : 's'}
       </div>
     </div>

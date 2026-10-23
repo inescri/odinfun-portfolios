@@ -66,7 +66,7 @@ export function AccountCard({ account, state, btcUsd, onRemove }: Props) {
               </button>
             </>
           ) : (
-            <button className="btn btn-sm btn-outline" onClick={() => setConfirming(true)}>
+            <button className="btn btn-sm btn-ghost" onClick={() => setConfirming(true)}>
               Remove
             </button>
           )}
