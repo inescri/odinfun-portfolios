@@ -706,3 +706,84 @@ h3 {
     background-position: -200% 0;
   }
 }
+
+/* ── Featured tokens (top 3 by value, combined view) ── */
+
+.token-grid-featured {
+  grid-template-columns: 1fr;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 720px) {
+  .token-grid-featured {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.token-card-featured {
+  padding: 1.1rem;
+  gap: 0.75rem;
+}
+
+.token-card-featured .token-card-head .pct {
+  margin-left: auto;
+}
+
+.featured-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.featured-amount {
+  font-size: 1.5rem;
+}
+
+.featured-row .value-stack {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Candlesticks: up/down share the P&L chip colours; gap hours are muted. */
+.candle-chart {
+  display: block;
+  width: 100%;
+  height: 64px;
+}
+
+.candle line {
+  stroke-width: 1;
+}
+
+.candle-up line,
+.candle-up rect {
+  stroke: #4ade80;
+  fill: #4ade80;
+}
+
+.candle-down line {
+  stroke: #f87171;
+}
+
+/* Hollow body: direction readable without relying on red vs green. */
+.candle-down rect {
+  stroke: #f87171;
+  stroke-width: 1;
+  fill: transparent;
+}
+
+.candle-gap line,
+.candle-gap rect {
+  stroke: var(--subtle);
+  fill: var(--subtle);
+  opacity: 0.5;
+}
+
+.candle-skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}

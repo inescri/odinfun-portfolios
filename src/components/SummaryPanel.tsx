@@ -1,8 +1,13 @@
 import { Bitcoin, Clock, Coins, Layers, Wallet } from 'lucide-react';
 
+import { useCandles } from '../hooks/useCandles';
 import type { PortfolioSummary } from '../lib/aggregate';
 import { formatBtc, formatUsd, msatsToUsd } from '../lib/value';
 import { AggregatedTokenCard } from './AggregatedTokenCard';
+import { FeaturedTokenCard } from './FeaturedTokenCard';
+
+/** How many top non-BTC tokens get the wide card with a chart. */
+const FEATURED_COUNT = 3;
 
 interface Props {
   summary: PortfolioSummary;
@@ -22,6 +27,14 @@ function timeAgo(ts: number): string {
 }
 
 export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: Props) {
+  // byToken is BTC first, then value desc; BTC is pinned so it never takes a featured slot.
+  const featured = summary.byToken.filter((t) => t.tokenId !== 'btc').slice(0, FEATURED_COUNT);
+  const featuredIds = new Set(featured.map((t) => t.tokenId));
+  const rest = summary.byToken.filter((t) => !featuredIds.has(t.tokenId));
+  const candles = useCandles(
+    featured.map((t) => ({ tokenId: t.tokenId, seedPrice: t.price1d })),
+    lastUpdated,
+  );
   return (
     <section className="card summary">
       <div className="summary-top">
@@ -77,11 +90,25 @@ export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: 
             <Layers className="icon" aria-hidden="true" />
             All holdings combined
           </h3>
-          <div className="token-grid">
-            {summary.byToken.map((t) => (
-              <AggregatedTokenCard key={t.tokenId} token={t} btcUsd={btcUsd} />
-            ))}
-          </div>
+          {featured.length > 0 ? (
+            <div className="token-grid token-grid-featured">
+              {featured.map((t) => (
+                <FeaturedTokenCard
+                  key={t.tokenId}
+                  token={t}
+                  btcUsd={btcUsd}
+                  candles={candles[t.tokenId]}
+                />
+              ))}
+            </div>
+          ) : null}
+          {rest.length > 0 ? (
+            <div className="token-grid">
+              {rest.map((t) => (
+                <AggregatedTokenCard key={t.tokenId} token={t} btcUsd={btcUsd} />
+              ))}
+            </div>
+          ) : null}
         </>
       ) : null}
     </section>
