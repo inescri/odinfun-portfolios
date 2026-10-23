@@ -88,6 +88,28 @@ h3 {
   font-weight: 500;
 }
 
+/* Lucide icons: 14px, tertiary by default; .icon-inherit takes the parent colour. */
+.icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--subtle);
+}
+
+.icon-inherit {
+  color: inherit;
+}
+
+.icon-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ── Layout ── */
 
 .app {
@@ -271,14 +293,24 @@ h3 {
   font-size: 0.9rem;
 }
 
+.banner-body {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .banner-error {
   background: rgba(240, 82, 82, 0.15);
   border: 1px solid rgba(240, 82, 82, 0.5);
 }
 
 .banner-notice {
-  background: rgba(0, 255, 255, 0.08);
-  border: 1px solid rgba(0, 255, 255, 0.35);
+  background: var(--surface);
+  border: 1px solid rgba(74, 222, 128, 0.4);
+}
+
+.banner-notice .banner-icon {
+  color: #4ade80;
 }
 
 /* ── Empty state ── */
@@ -335,6 +367,9 @@ h3 {
 }
 
 .summary-stats dt {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--subtle);
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -348,6 +383,9 @@ h3 {
 }
 
 .summary h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin: 1.75rem 0 0.75rem;
   font-size: 1rem;
   color: var(--subtle);
@@ -418,6 +456,34 @@ h3 {
 
 .principal:hover {
   color: var(--text);
+}
+
+.principal-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.principal,
+.principal-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.principal-link {
+  color: var(--muted);
+  line-height: 0;
+}
+
+.principal-link:hover {
+  color: var(--text);
+}
+
+.principal .icon,
+.principal-link .icon {
+  width: 11px;
+  height: 11px;
 }
 
 .account-value {
@@ -507,7 +573,7 @@ h3 {
 }
 
 .token-img {
-  border-radius: 50%;
+  border-radius: var(--radius);
   object-fit: cover;
   background: var(--surface-raised);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);

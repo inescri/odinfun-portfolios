@@ -1,3 +1,5 @@
+import { Bitcoin, Clock, Coins, Layers, Wallet } from 'lucide-react';
+
 import type { PortfolioSummary } from '../lib/aggregate';
 import { formatBtc, formatUsd, msatsToUsd } from '../lib/value';
 import { AggregatedTokenCard } from './AggregatedTokenCard';
@@ -34,19 +36,31 @@ export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: 
         </div>
         <dl className="summary-stats">
           <div>
-            <dt>Accounts</dt>
+            <dt>
+              <Wallet className="icon" aria-hidden="true" />
+              Accounts
+            </dt>
             <dd>{summary.accountCount}</dd>
           </div>
           <div>
-            <dt>Tokens</dt>
+            <dt>
+              <Coins className="icon" aria-hidden="true" />
+              Tokens
+            </dt>
             <dd>{summary.tokenCount}</dd>
           </div>
           <div>
-            <dt>BTC / USD</dt>
+            <dt>
+              <Bitcoin className="icon" aria-hidden="true" />
+              BTC / USD
+            </dt>
             <dd>{btcUsd === null ? '—' : formatUsd(btcUsd)}</dd>
           </div>
           <div>
-            <dt>Updated</dt>
+            <dt>
+              <Clock className="icon" aria-hidden="true" />
+              Updated
+            </dt>
             <dd>{lastUpdated === null ? '—' : timeAgo(lastUpdated)}</dd>
           </div>
         </dl>
@@ -59,7 +73,10 @@ export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: 
       ) : null}
       {summary.byToken.length > 0 ? (
         <>
-          <h3>All holdings combined</h3>
+          <h3>
+            <Layers className="icon" aria-hidden="true" />
+            All holdings combined
+          </h3>
           <div className="token-grid">
             {summary.byToken.map((t) => (
               <AggregatedTokenCard key={t.tokenId} token={t} btcUsd={btcUsd} />

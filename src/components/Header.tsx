@@ -1,3 +1,5 @@
+import { Plus, RefreshCw } from 'lucide-react';
+
 import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { AddStatus } from '../hooks/useAddAccount';
 
@@ -11,7 +13,7 @@ interface Props {
 
 const ADD_LABEL: Record<AddStatus, string> = {
   restoring: 'Loading…',
-  idle: '+ Add account',
+  idle: 'Add account',
   connecting: 'Waiting for Odin…',
   saving: 'Saving…',
 };
@@ -36,10 +38,15 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
       <div className="header-controls">
         {hasAccounts ? (
           <button className="btn btn-outline" onClick={onRefresh} disabled={refreshing}>
+            <RefreshCw
+              className={`icon icon-inherit${refreshing ? ' icon-spin' : ''}`}
+              aria-hidden="true"
+            />
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
         ) : null}
         <button className="btn btn-primary" onClick={onAdd} disabled={status !== 'idle'}>
+          {status === 'idle' ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
           {ADD_LABEL[status]}
         </button>
       </div>

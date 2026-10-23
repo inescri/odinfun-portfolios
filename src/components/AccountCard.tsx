@@ -1,5 +1,7 @@
+import { Check, Copy, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 
+import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { StoredAccount } from '../db/db';
 import type { AccountState } from '../hooks/useHoldings';
 import { odin } from '../odin/client';
@@ -47,9 +49,27 @@ export function AccountCard({ account, state, btcUsd, onRemove }: Props) {
         )}
         <div className="account-id">
           <div className="account-name">{label}</div>
-          <button className="principal" onClick={copy} title={account.principal}>
-            <code>{shortPrincipal(account.principal)}</code> {copied ? '✓ copied' : '⧉'}
-          </button>
+          <div className="principal-row">
+            <button className="principal" onClick={copy} title={account.principal}>
+              <code>{shortPrincipal(account.principal)}</code>
+              {copied ? (
+                <Check className="icon icon-inherit" aria-hidden="true" />
+              ) : (
+                <Copy className="icon icon-inherit" aria-hidden="true" />
+              )}
+              {copied ? 'copied' : null}
+            </button>
+            <a
+              className="principal-link"
+              href={`${ODIN_ORIGINS[APP_ENV]}/user/${account.principal}`}
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Open on Odin"
+              title="Open on Odin"
+            >
+              <ExternalLink className="icon icon-inherit" aria-hidden="true" />
+            </a>
+          </div>
         </div>
         <div className="account-value">
           <ValueStack msats={sumMsats(holdings)} btcUsd={btcUsd} size="lg" />
