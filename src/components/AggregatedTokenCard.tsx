@@ -2,6 +2,7 @@ import type { AggregatedToken } from '../lib/aggregate';
 import { formatCompactAmount } from '../lib/amounts';
 import { tokenPlaces } from '../lib/tokens';
 import { formatPct, priceChangePct } from '../lib/value';
+import { TokenBackdrop } from './TokenBackdrop';
 import { TokenImage } from './TokenImage';
 import { ValueStack } from './ValueStack';
 
@@ -15,6 +16,7 @@ export function AggregatedTokenCard({ token, btcUsd }: Props) {
   const n = token.holders.length;
   return (
     <div className="token-card">
+      <TokenBackdrop tokenId={token.tokenId} />
       <div className="token-card-head">
         <TokenImage tokenId={token.tokenId} ticker={token.ticker} />
         <div className="token-card-id">

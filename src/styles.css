@@ -513,6 +513,9 @@ h3 {
 
 .token-card {
   background: var(--surface-card);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   border: 1px solid var(--card-border);
   border-radius: var(--radius);
   padding: 0.9rem;
@@ -530,6 +533,42 @@ h3 {
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+.token-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Token artwork behind the card content, dimmed and faded into the card colour. */
+.token-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.token-backdrop-btc {
+  background: radial-gradient(ellipse at 80% 20%, rgba(247, 147, 26, 0.6), transparent 65%);
+}
+
+.token-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(26, 30, 37, 0.35) 0%,
+    rgba(26, 30, 37, 0.85) 55%,
+    rgba(26, 30, 37, 0.97) 100%
+  );
+}
+
 .token-card-head {
   display: flex;
   align-items: center;
@@ -540,6 +579,26 @@ h3 {
 .token-card-id {
   min-width: 0;
   flex: 1;
+}
+
+.token-img {
+  border-radius: var(--radius);
+  object-fit: cover;
+  background: var(--surface-raised);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.token-img-btc {
+  background: var(--btc);
+  color: #000;
+  font-size: 1.2rem;
 }
 
 .token-ticker {
@@ -570,26 +629,6 @@ h3 {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.token-img {
-  border-radius: var(--radius);
-  object-fit: cover;
-  background: var(--surface-raised);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-
-.token-img-btc {
-  background: var(--btc);
-  color: #000;
-  font-size: 1.2rem;
 }
 
 .pct {
@@ -653,6 +692,10 @@ h3 {
 .skeleton:hover {
   transform: none;
   border-color: transparent;
+}
+
+.skeleton::after {
+  display: none;
 }
 
 @keyframes shimmer {

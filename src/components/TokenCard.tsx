@@ -2,6 +2,7 @@ import { formatCompactAmount } from '../lib/amounts';
 import type { Holding } from '../lib/holdings';
 import { tokenPlaces } from '../lib/tokens';
 import { formatPct, priceChangePct } from '../lib/value';
+import { TokenBackdrop } from './TokenBackdrop';
 import { TokenImage } from './TokenImage';
 import { ValueStack } from './ValueStack';
 
@@ -14,6 +15,7 @@ export function TokenCard({ holding, btcUsd }: Props) {
   const change = priceChangePct(Number(holding.priceMsats), holding.price1d);
   return (
     <div className="token-card">
+      <TokenBackdrop tokenId={holding.tokenId} />
       <div className="token-card-head">
         <TokenImage tokenId={holding.tokenId} ticker={holding.ticker} size={36} />
         <div className="token-card-id">
