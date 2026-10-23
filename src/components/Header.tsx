@@ -24,7 +24,7 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
     <header className="app-header">
       <div className="title-block">
         <h1>
-          Odin Portfolio
+          ODIN•FUN Portfolio
           {APP_ENV !== 'prod' ? <span className="env-badge">{APP_ENV}</span> : null}
         </h1>
         <p className="muted small">
