@@ -82,7 +82,9 @@ export function formatPnlAmount(changeMsats: bigint, btcUsd: number | null): str
   const sign = changeMsats < 0n ? '-' : '+';
   const abs = changeMsats < 0n ? -changeMsats : changeMsats;
   if (btcUsd === null) return `${sign}${formatBtc(abs, { maxFractionDigits: 6 })} BTC`;
-  return `${sign}${formatUsd(msatsToUsd(abs, btcUsd))}`;
+  const usd = msatsToUsd(abs, btcUsd);
+  // formatUsd's `<$0.01` floor does not take a sign; a sub-cent change is just zero cents.
+  return `${sign}${usd < 0.005 ? '$0.00' : formatUsd(usd)}`;
 }
 
 /** Integer-safe percentage of `part` in `whole`, two decimals. */

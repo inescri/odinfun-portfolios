@@ -42,7 +42,21 @@ export interface RenderOptions {
  * Load an image with CORS enabled so drawing it never taints the canvas.
  * Resolves null on error or timeout; the caller draws a fallback.
  */
+/** Loaded token images by URL, so re-renders (toggles, polls) do not refetch. Failures are not kept. */
+const imageCache = new Map<string, Promise<HTMLImageElement | null>>();
+
 function loadImage(url: string): Promise<HTMLImageElement | null> {
+  const cached = imageCache.get(url);
+  if (cached !== undefined) return cached;
+  const pending = fetchImage(url).then((img) => {
+    if (img === null) imageCache.delete(url);
+    return img;
+  });
+  imageCache.set(url, pending);
+  return pending;
+}
+
+function fetchImage(url: string): Promise<HTMLImageElement | null> {
   return new Promise((resolve) => {
     const img = new Image();
     const timer = setTimeout(() => resolve(null), IMAGE_TIMEOUT_MS);
@@ -323,11 +337,12 @@ function drawHoldings(
     if (row.pnlLabel !== null) sub += '   ';
     ctx.fillText(sub, textX, rowTop + 44);
     if (row.pnlLabel !== null) {
+      // Measure with the font it was drawn in, before switching to the gain font.
+      const gainX = textX + ctx.measureText(sub).width;
       const up = !row.pnlLabel.startsWith('-');
       ctx.fillStyle = up ? C.success : C.danger;
       ctx.font = font(600, 16);
       const gain = `${up ? '▲' : '▼'} ${row.pnlLabel}`;
-      const gainX = textX + ctx.measureText(sub).width;
       ctx.fillText(gain, gainX, rowTop + 44);
       // A row falling back to the 24h move says so when the card is otherwise PNL.
       if (row.pnlKind === '24h' && data.pnlKind === 'pnl') {

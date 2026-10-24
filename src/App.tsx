@@ -68,7 +68,7 @@ export default function App() {
             lastUpdated={lastUpdated}
             pendingAccounts={pending}
           />
-          <ShareDialog open={sharing} onClose={closeShare} summary={summary} btcUsd={btcUsd} />
+          {sharing ? <ShareDialog onClose={closeShare} summary={summary} btcUsd={btcUsd} /> : null}
           <h2 className="section-title">Accounts</h2>
           <div className="accounts">
             {accounts.map((a) => (

@@ -65,6 +65,9 @@ function tokenHolding(token: OdinToken, balance: bigint, extras: UserTokenExtras
   const decimals = token.decimals ?? 3;
   const priceMsats = priceToMsats(token.price);
   const entryMsats = priceToMsats(extras.price);
+  const places = divisibility + decimals;
+  // A known entry price whose cost rounds to nothing is no cost basis at all.
+  const costMsats = entryMsats > 0n ? holdingValueMsats(entryMsats, balance, places) : 0n;
   return {
     tokenId: token.id,
     ticker: token.ticker,
@@ -75,9 +78,8 @@ function tokenHolding(token: OdinToken, balance: bigint, extras: UserTokenExtras
     balance,
     priceMsats,
     price1d: token.price_1d ?? null,
-    valueMsats: holdingValueMsats(priceMsats, balance, divisibility + decimals),
-    costMsats:
-      entryMsats > 0n ? holdingValueMsats(entryMsats, balance, divisibility + decimals) : null,
+    valueMsats: holdingValueMsats(priceMsats, balance, places),
+    costMsats: costMsats > 0n ? costMsats : null,
   };
 }
 

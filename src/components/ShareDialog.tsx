@@ -9,8 +9,8 @@ import { tokenImageUrl } from '../lib/tokenImage';
 import { canCopyImage, canShareFile, copyImage, downloadBlob, shareFile } from '../lib/shareTargets';
 
 interface Props {
-  open: boolean;
   onClose: () => void;
+  /** Snapshotted on mount: a background refresh must not repaint the card or wipe the status line. */
   summary: PortfolioSummary;
   btcUsd: number | null;
 }
@@ -25,10 +25,12 @@ const FOOTER = SITE_URL.replace(/^https?:\/\//, '').replace(/\/+$/, '');
  * Renders the portfolio to a 1200×630 PNG in the browser and offers it for
  * download, clipboard, or the OS share sheet. The card never includes
  * principals or usernames, and "Hide amounts" masks every value so the
- * holdings can be shown without the size.
+ * holdings can be shown without the size. Mount it only while open: state
+ * (preview, options, status) starts fresh each time.
  */
-export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
+export function ShareDialog({ onClose, summary: liveSummary, btcUsd: liveBtcUsd }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  const [{ summary, btcUsd }] = useState(() => ({ summary: liveSummary, btcUsd: liveBtcUsd }));
   const [hideAmounts, setHideAmounts] = useState(false);
   const [pnlMode, setPnlMode] = useState<PnlMode>('pct');
   const [render, setRender] = useState<Render>({ status: 'rendering' });
@@ -37,10 +39,8 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
   // Native <dialog> handles focus trap, Escape and the backdrop.
   useEffect(() => {
     const el = ref.current;
-    if (el === null) return;
-    if (open && !el.open) el.showModal();
-    else if (!open && el.open) el.close();
-  }, [open]);
+    if (el !== null && !el.open) el.showModal();
+  }, []);
 
   const file = useMemo(
     () => (render.status === 'ready' ? new File([render.blob], shareCardFileName(), { type: 'image/png' }) : null),
@@ -48,7 +48,6 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
   );
 
   useEffect(() => {
-    if (!open) return;
     let active = true;
     let url: string | null = null;
     setRender({ status: 'rendering' });
@@ -71,7 +70,7 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
       active = false;
       if (url !== null) URL.revokeObjectURL(url);
     };
-  }, [open, summary, btcUsd, hideAmounts, pnlMode]);
+  }, [summary, btcUsd, hideAmounts, pnlMode]);
 
   const ready = render.status === 'ready';
   const showCopy = canCopyImage();

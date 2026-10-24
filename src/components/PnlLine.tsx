@@ -1,4 +1,5 @@
-import { formatBtc, formatPct, formatUsd, msatsToUsd, pnlPct } from '../lib/value';
+import { formatPnlAmount } from '../lib/shareCard';
+import { formatPct, pnlPct } from '../lib/value';
 
 interface Props {
   /** Value and cost basis over the same positions; PNL is `value - cost`. */
@@ -16,15 +17,9 @@ export function PnlLine({ valueMsats, costMsats, btcUsd }: Props) {
   if (pct === null || costMsats === null) return null;
   const diff = valueMsats - costMsats;
   const up = diff >= 0n;
-  const abs = up ? diff : -diff;
-  const amount =
-    btcUsd === null
-      ? `${formatBtc(abs, { maxFractionDigits: 6 })} BTC`
-      : formatUsd(msatsToUsd(abs, btcUsd));
   return (
     <div className={`value-pnl ${up ? 'pct-up-text' : 'pct-down-text'}`} title="Unrealized PNL vs. average entry">
-      <span className="value-pnl-label">PNL</span> {up ? '+' : '-'}
-      {amount} ({formatPct(pct)})
+      <span className="value-pnl-label">PNL</span> {formatPnlAmount(diff, btcUsd)} ({formatPct(pct)})
     </div>
   );
 }

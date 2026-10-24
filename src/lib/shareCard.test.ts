@@ -192,6 +192,9 @@ describe('formatPnlAmount', () => {
     expect(formatPnlAmount(-50_000_000_000n, 100_000)).toBe('-$50,000.00');
     expect(formatPnlAmount(50_000_000_000n, 100_000)).toBe('+$50,000.00');
     expect(formatPnlAmount(0n, 100_000)).toBe('+$0.00');
+    // Sub-cent either way is zero cents, never `-<$0.01`.
+    expect(formatPnlAmount(-1_000n, 100_000)).toBe('-$0.00');
+    expect(formatPnlAmount(1_000n, 100_000)).toBe('+$0.00');
     expect(formatPnlAmount(-1_000_000n, null)).toBe('-0.00001 BTC');
   });
 });
