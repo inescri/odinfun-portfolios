@@ -164,7 +164,7 @@ export function buildShareCard(
 
   const label = (g: Gain | undefined): string | null => {
     if (g === undefined) return null;
-    if (pnlMode === 'amount') return formatPnlAmount(g.msats, btcUsd);
+    if (pnlMode === 'amount') return formatPnlAmount(g.msats, btcUsd, { compact: true });
     return g.pct === null ? null : formatPct(g.pct);
   };
 

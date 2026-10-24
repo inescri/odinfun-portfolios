@@ -112,8 +112,8 @@ describe('buildShareCard', () => {
 
     const amount = buildShareCard(summary, 100_000, { now: NOW, pnlMode: 'amount' });
     expect(amount.pnlMode).toBe('amount');
-    expect(amount.rows[0]!.pnlLabel).toBe('+$4,545.45');
-    expect(amount.pnlLabel).toBe('+$4,545.45');
+    expect(amount.rows[0]!.pnlLabel).toBe('+$4.5K');
+    expect(amount.pnlLabel).toBe('+$4.5K');
 
     const noRate = buildShareCard(summary, null, { now: NOW, pnlMode: 'amount' });
     expect(noRate.rows[0]!.pnlLabel).toBe('+0.045454 BTC');

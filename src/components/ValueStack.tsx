@@ -1,4 +1,4 @@
-import { formatBtc, formatUsd, msatsToUsd } from '../lib/value';
+import { formatBtc, formatUsdCompact, msatsToUsd } from '../lib/value';
 
 interface Props {
   msats: bigint;
@@ -13,7 +13,7 @@ export function ValueStack({ msats, btcUsd, size = 'sm' }: Props) {
       <span className="value-btc">
         {formatBtc(msats, { maxFractionDigits: size === 'lg' ? 8 : 6 })} <span className="unit">BTC</span>
       </span>
-      <span className="value-usd">{btcUsd === null ? '—' : formatUsd(msatsToUsd(msats, btcUsd))}</span>
+      <span className="value-usd">{btcUsd === null ? '—' : formatUsdCompact(msatsToUsd(msats, btcUsd))}</span>
     </div>
   );
 }
