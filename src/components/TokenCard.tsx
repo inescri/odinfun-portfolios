@@ -5,6 +5,7 @@ import { TokenBackdrop } from './TokenBackdrop';
 import { TokenImage } from './TokenImage';
 import { priceChangePct } from '../lib/value';
 import { PctChip } from './PctChip';
+import { PnlLine } from './PnlLine';
 import { ValueStack } from './ValueStack';
 
 interface Props {
@@ -30,11 +31,8 @@ export function TokenCard({ holding, btcUsd }: Props) {
         </div>
         {change !== null ? <PctChip change={change} label="24h" title="Price change over 24h" /> : null}
       </div>
-      <ValueStack
-        msats={holding.valueMsats}
-        btcUsd={btcUsd}
-        pnl={{ valueMsats: holding.valueMsats, costMsats: holding.costMsats }}
-      />
+      <PnlLine valueMsats={holding.valueMsats} costMsats={holding.costMsats} btcUsd={btcUsd} />
+      <ValueStack msats={holding.valueMsats} btcUsd={btcUsd} />
     </div>
   );
 }

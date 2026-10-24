@@ -77,7 +77,7 @@ with no entry price (BTC, deposited runes) falls back to its 24h price move
 and is marked "24h". The card never includes principals or usernames.
 
 Token cards on the dashboard keep the `24h` price-move chip and add a PNL line
-under the holding value: `PNL +$90,000.00 (+120.0%)` (BTC when no rate is
+directly under the balance: `PNL +$90,000.00 (+120.0%)` (BTC when no rate is
 known). The line is omitted when the API has no entry price for the token. Token images
 are fetched from the Odin CDN with CORS so they cannot taint the canvas; a
 ticker-initial fallback is drawn when an image is unavailable.

@@ -723,8 +723,10 @@ h3 {
 .value-pnl {
   font-size: 0.85rem;
   font-weight: 600;
-  margin-top: 0.1rem;
+  margin-top: -0.25rem;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .value-pnl-label {
@@ -818,6 +820,12 @@ h3 {
   justify-content: space-between;
   align-items: flex-end;
   gap: 0.75rem;
+  min-width: 0;
+}
+
+.featured-amount-block {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
