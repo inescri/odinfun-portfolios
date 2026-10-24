@@ -19,7 +19,7 @@ export function PnlLine({ valueMsats, costMsats, btcUsd }: Props) {
   const up = diff >= 0n;
   return (
     <div className={`value-pnl ${up ? 'pct-up-text' : 'pct-down-text'}`} title="Unrealized PNL vs. average entry">
-      <span className="value-pnl-label">PNL</span> {formatPnlAmount(diff, btcUsd)} ({formatPct(pct)})
+      <span className="value-pnl-label">PNL</span> {formatPnlAmount(diff, btcUsd, { compact: true })} ({formatPct(pct)})
     </div>
   );
 }

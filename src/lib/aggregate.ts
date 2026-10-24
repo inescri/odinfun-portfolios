@@ -41,6 +41,23 @@ export function tokenPnlPct(t: Pick<AggregatedToken, 'costMsats' | 'pnlValueMsat
   return pnlPct(t.pnlValueMsats, t.costMsats);
 }
 
+/**
+ * Portfolio-wide unrealized PNL summed over positions with a known cost basis,
+ * or null when no position has one.
+ */
+export function portfolioPnl(
+  byToken: readonly Pick<AggregatedToken, 'costMsats' | 'pnlValueMsats'>[],
+): { pnlMsats: bigint; pct: number | null } | null {
+  let cost: bigint | null = null;
+  let value = 0n;
+  for (const t of byToken) {
+    if (t.costMsats === null || t.pnlValueMsats === null) continue;
+    cost = (cost ?? 0n) + t.costMsats;
+    value += t.pnlValueMsats;
+  }
+  return cost === null ? null : { pnlMsats: value - cost, pct: pnlPct(value, cost) };
+}
+
 export interface PortfolioSummary {
   totalMsats: bigint;
   accountCount: number;

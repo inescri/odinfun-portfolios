@@ -1,6 +1,15 @@
 import { tokenPnlMsats, tokenPnlPct } from './aggregate';
 import type { PortfolioSummary } from './aggregate';
-import { formatBtc, formatPct, formatUsd, holdingValueMsats, msatsToUsd, priceChangePct, priceToMsats } from './value';
+import {
+  formatBtc,
+  formatPct,
+  formatUsd,
+  formatUsdCompact,
+  holdingValueMsats,
+  msatsToUsd,
+  priceChangePct,
+  priceToMsats,
+} from './value';
 
 /** One holding row on the share card. */
 export interface ShareCardRow {
@@ -75,14 +84,22 @@ export function formatDateLabel(now: number, timeZone?: string): string {
   }).format(new Date(now));
 }
 
-/** Signed change in msats as `+$1,234.56`, or `+0.0012 BTC` when no rate is known. */
-export function formatPnlAmount(changeMsats: bigint, btcUsd: number | null): string {
+/**
+ * Signed change in msats as `+$1,234.56`, or `+0.0012 BTC` when no rate is known.
+ * With `compact`, large USD amounts shorten to `+$1.2K` / `-$3.4M`.
+ */
+export function formatPnlAmount(
+  changeMsats: bigint,
+  btcUsd: number | null,
+  opts: { compact?: boolean } = {},
+): string {
   const sign = changeMsats < 0n ? '-' : '+';
   const abs = changeMsats < 0n ? -changeMsats : changeMsats;
   if (btcUsd === null) return `${sign}${formatBtc(abs, { maxFractionDigits: 6 })} BTC`;
   const usd = msatsToUsd(abs, btcUsd);
   // formatUsd's `<$0.01` floor does not take a sign; a sub-cent change is just zero cents.
-  return `${sign}${usd < 0.005 ? '$0.00' : formatUsd(usd)}`;
+  if (usd < 0.005) return `${sign}$0.00`;
+  return `${sign}${opts.compact ? formatUsdCompact(usd) : formatUsd(usd)}`;
 }
 
 /** Integer-safe percentage of `part` in `whole`, two decimals. */
@@ -147,7 +164,7 @@ export function buildShareCard(
 
   const label = (g: Gain | undefined): string | null => {
     if (g === undefined) return null;
-    if (pnlMode === 'amount') return formatPnlAmount(g.msats, btcUsd);
+    if (pnlMode === 'amount') return formatPnlAmount(g.msats, btcUsd, { compact: true });
     return g.pct === null ? null : formatPct(g.pct);
   };
 

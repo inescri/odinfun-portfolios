@@ -1,8 +1,9 @@
-import { Plus, RefreshCw, Share2 } from 'lucide-react';
+import { Bitcoin, Plus, RefreshCw, Share2 } from 'lucide-react';
 
 import { SITE_NAME } from '../brand';
 import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { AddStatus } from '../hooks/useAddAccount';
+import { formatUsd } from '../lib/value';
 
 interface Props {
   status: AddStatus;
@@ -13,6 +14,8 @@ interface Props {
   hasAccounts: boolean;
   /** False until at least one account has a snapshot; an empty card is not worth sharing. */
   canShare: boolean;
+  /** Current BTC/USD rate, or null while unknown. */
+  btcUsd: number | null;
 }
 
 export const ADD_LABEL: Record<AddStatus, string> = {
@@ -22,7 +25,16 @@ export const ADD_LABEL: Record<AddStatus, string> = {
   saving: 'Saving…',
 };
 
-export function Header({ status, onAdd, onRefresh, onShare, refreshing, hasAccounts, canShare }: Props) {
+export function Header({
+  status,
+  onAdd,
+  onRefresh,
+  onShare,
+  refreshing,
+  hasAccounts,
+  canShare,
+  btcUsd,
+}: Props) {
   const origin = ODIN_ORIGINS[APP_ENV];
   return (
     <header className="app-header">
@@ -44,6 +56,11 @@ export function Header({ status, onAdd, onRefresh, onShare, refreshing, hasAccou
       {/* With no accounts the empty state owns the only call to action. */}
       {hasAccounts ? (
         <div className="header-controls">
+          <div className="header-rate" title="BTC / USD">
+            <Bitcoin className="icon" aria-hidden="true" />
+            <span className="muted small">BTC / USD</span>
+            <strong>{btcUsd === null ? '—' : formatUsd(btcUsd)}</strong>
+          </div>
           <button className="btn btn-outline" onClick={onShare} disabled={!canShare}>
             <Share2 className="icon icon-inherit" aria-hidden="true" />
             Share

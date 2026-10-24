@@ -1,8 +1,10 @@
-import { Bitcoin, Clock, Coins, Layers, Wallet } from 'lucide-react';
+import { Clock, Coins, Layers, TrendingUp, Wallet } from 'lucide-react';
 
 import { useCandles } from '../hooks/useCandles';
+import { portfolioPnl } from '../lib/aggregate';
 import type { PortfolioSummary } from '../lib/aggregate';
-import { formatBtc, formatUsd, msatsToUsd } from '../lib/value';
+import { formatPnlAmount } from '../lib/shareCard';
+import { formatBtc, formatPct, formatUsd, msatsToUsd } from '../lib/value';
 import { AggregatedTokenCard } from './AggregatedTokenCard';
 import { FeaturedTokenCard } from './FeaturedTokenCard';
 
@@ -31,6 +33,11 @@ export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: 
   const featured = summary.byToken.filter((t) => t.tokenId !== 'btc').slice(0, FEATURED_COUNT);
   const featuredIds = new Set(featured.map((t) => t.tokenId));
   const rest = summary.byToken.filter((t) => !featuredIds.has(t.tokenId));
+  const pnl = portfolioPnl(summary.byToken);
+  const pnlLabel =
+    pnl === null
+      ? '—'
+      : formatPnlAmount(pnl.pnlMsats, btcUsd, { compact: true }) + (pnl.pct === null ? '' : ` (${formatPct(pnl.pct)})`);
   const candles = useCandles(
     featured.map((t) => ({ tokenId: t.tokenId, seedPrice: t.price1d })),
     lastUpdated,
@@ -62,12 +69,14 @@ export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: 
             </dt>
             <dd>{summary.tokenCount}</dd>
           </div>
-          <div>
+          <div title="Unrealized PNL vs. average entry, over positions with a known cost basis">
             <dt>
-              <Bitcoin className="icon" aria-hidden="true" />
-              BTC / USD
+              <TrendingUp className="icon" aria-hidden="true" />
+              Unrealized PNL
             </dt>
-            <dd>{btcUsd === null ? '—' : formatUsd(btcUsd)}</dd>
+            <dd className={pnl === null ? undefined : pnl.pnlMsats >= 0n ? 'pct-up-text' : 'pct-down-text'}>
+              {pnlLabel}
+            </dd>
           </div>
           <div>
             <dt>
