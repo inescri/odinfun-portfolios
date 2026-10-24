@@ -11,6 +11,8 @@ interface Props {
   onShare: () => void;
   refreshing: boolean;
   hasAccounts: boolean;
+  /** False until at least one account has a snapshot; an empty card is not worth sharing. */
+  canShare: boolean;
 }
 
 export const ADD_LABEL: Record<AddStatus, string> = {
@@ -20,7 +22,7 @@ export const ADD_LABEL: Record<AddStatus, string> = {
   saving: 'Saving…',
 };
 
-export function Header({ status, onAdd, onRefresh, onShare, refreshing, hasAccounts }: Props) {
+export function Header({ status, onAdd, onRefresh, onShare, refreshing, hasAccounts, canShare }: Props) {
   const origin = ODIN_ORIGINS[APP_ENV];
   return (
     <header className="app-header">
@@ -42,7 +44,7 @@ export function Header({ status, onAdd, onRefresh, onShare, refreshing, hasAccou
       {/* With no accounts the empty state owns the only call to action. */}
       {hasAccounts ? (
         <div className="header-controls">
-          <button className="btn btn-outline" onClick={onShare}>
+          <button className="btn btn-outline" onClick={onShare} disabled={!canShare}>
             <Share2 className="icon icon-inherit" aria-hidden="true" />
             Share
           </button>

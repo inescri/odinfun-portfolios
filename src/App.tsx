@@ -52,6 +52,7 @@ export default function App() {
         onShare={openShare}
         refreshing={refreshing}
         hasAccounts={accounts.length > 0}
+        canShare={summary.accountCount > 0}
       />
       {error !== null ? <Banner kind="error" text={error} onDismiss={dismiss} /> : null}
       {notice !== null ? <Banner kind="notice" text={notice} onDismiss={dismiss} /> : null}

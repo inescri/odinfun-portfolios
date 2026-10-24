@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { aggregate } from './aggregate';
 import type { Holding } from './holdings';
+import { formatPct } from './value';
 import {
   AMOUNT_MASK,
   buildShareCard,
@@ -76,12 +77,15 @@ describe('buildShareCard', () => {
     expect(card.tokenCount).toBe(7);
   });
 
-  it('computes share of total and 24h change', () => {
+  it('computes share of total and the per-row gain', () => {
     const [odin, btc] = card.rows;
     expect(odin!.sharePct).toBeCloseTo(71.42, 2);
-    expect(odin!.changePct).toBeCloseTo(10, 5);
+    // ODIN has a cost basis at 1000 msats, so its gain is unrealized PNL: +10%.
+    expect(odin!.pnlKind).toBe('pnl');
+    expect(odin!.pnlLabel).toBe(formatPct(10));
     expect(btc!.sharePct).toBeCloseTo(28.57, 2);
-    expect(btc!.changePct).toBeNull();
+    expect(btc!.pnlKind).toBeNull();
+    expect(btc!.pnlLabel).toBeNull();
   });
 
   it('masks every amount when hideAmounts is set, but keeps tickers and shares', () => {

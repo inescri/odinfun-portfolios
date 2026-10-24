@@ -12,8 +12,6 @@ export interface ShareCardRow {
   usdLabel: string | null;
   /** Share of total portfolio value, 0–100 with two decimals. */
   sharePct: number;
-  /** 24h price change in percent; null when unknown (always for BTC). */
-  changePct: number | null;
   /** Gain as shown: `+12.3%` or `+$1,234.56`; null when nothing is known. */
   pnlLabel: string | null;
   /** What `pnlLabel` measures: unrealized PNL from cost basis, or 24h price move. */
@@ -123,7 +121,6 @@ export function buildShareCard(
   interface Gain {
     kind: PnlKind;
     msats: bigint;
-    base: bigint;
     pct: number | null;
   }
   const gainOf = new Map<string, Gain>();
@@ -134,7 +131,7 @@ export function buildShareCard(
   for (const t of byValue) {
     const pnl = tokenPnlMsats(t);
     if (pnl !== null && t.costMsats !== null) {
-      gainOf.set(t.tokenId, { kind: 'pnl', msats: pnl, base: t.costMsats, pct: tokenPnlPct(t) });
+      gainOf.set(t.tokenId, { kind: 'pnl', msats: pnl, pct: tokenPnlPct(t) });
       pnlTotal += pnl;
       pnlBase += t.costMsats;
       continue;
@@ -143,12 +140,12 @@ export function buildShareCard(
     const places = t.divisibility + t.decimals;
     const value1d = holdingValueMsats(priceToMsats(t.price1d), t.balance, places);
     const pct = priceChangePct(Number(t.priceMsats), t.price1d);
-    gainOf.set(t.tokenId, { kind: '24h', msats: t.valueMsats - value1d, base: value1d, pct });
+    gainOf.set(t.tokenId, { kind: '24h', msats: t.valueMsats - value1d, pct });
     dayTotal += t.valueMsats - value1d;
     dayBase += value1d;
   }
 
-  const label = (g: Pick<Gain, 'msats' | 'pct'> | undefined): string | null => {
+  const label = (g: Gain | undefined): string | null => {
     if (g === undefined) return null;
     if (pnlMode === 'amount') return formatPnlAmount(g.msats, btcUsd);
     return g.pct === null ? null : formatPct(g.pct);
@@ -162,7 +159,6 @@ export function buildShareCard(
       valueLabel: btc(t.valueMsats, 6),
       usdLabel: usd(t.valueMsats),
       sharePct: sharePercent(t.valueMsats, summary.totalMsats),
-      changePct: t.tokenId === 'btc' ? null : priceChangePct(Number(t.priceMsats), t.price1d),
       pnlLabel: label(g),
       pnlKind: g?.kind ?? null,
     };
@@ -171,9 +167,9 @@ export function buildShareCard(
   // Portfolio line: PNL wins whenever any position has a cost basis.
   const total: Gain | undefined =
     pnlBase > 0n
-      ? { kind: 'pnl', msats: pnlTotal, base: pnlBase, pct: (Number(pnlTotal) / Number(pnlBase)) * 100 }
+      ? { kind: 'pnl', msats: pnlTotal, pct: (Number(pnlTotal) / Number(pnlBase)) * 100 }
       : dayBase > 0n
-        ? { kind: '24h', msats: dayTotal, base: dayBase, pct: (Number(dayTotal) / Number(dayBase)) * 100 }
+        ? { kind: '24h', msats: dayTotal, pct: (Number(dayTotal) / Number(dayBase)) * 100 }
         : undefined;
 
   return {
