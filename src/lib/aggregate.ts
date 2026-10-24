@@ -1,4 +1,5 @@
 import type { AccountHoldings, Holding } from './holdings';
+import { pnlPct } from './value';
 
 export interface TokenHolder {
   principal: string;
@@ -36,9 +37,8 @@ export function tokenPnlMsats(t: Pick<AggregatedToken, 'costMsats' | 'pnlValueMs
 
 /** Unrealized PNL as a percent of cost basis, or null. */
 export function tokenPnlPct(t: Pick<AggregatedToken, 'costMsats' | 'pnlValueMsats'>): number | null {
-  const pnl = tokenPnlMsats(t);
-  if (pnl === null || t.costMsats === null || t.costMsats <= 0n) return null;
-  return (Number(pnl) / Number(t.costMsats)) * 100;
+  if (t.pnlValueMsats === null) return null;
+  return pnlPct(t.pnlValueMsats, t.costMsats);
 }
 
 export interface PortfolioSummary {

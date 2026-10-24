@@ -68,3 +68,9 @@ export function formatPct(pct: number): string {
   const sign = pct > 0 ? '+' : '';
   return `${sign}${pct.toFixed(1)}%`;
 }
+
+/** Unrealized PNL as a percent of cost basis; null when the cost basis is unknown or zero. */
+export function pnlPct(valueMsats: bigint, costMsats: bigint | null): number | null {
+  if (costMsats === null || costMsats <= 0n) return null;
+  return (Number(valueMsats - costMsats) / Number(costMsats)) * 100;
+}

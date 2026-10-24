@@ -74,6 +74,10 @@ hidden. Gains are unrealized PNL against the API's average entry price
 (`price` on each `/user/:principal/tokens` item, millisats per token, stored
 as `costMsats = entry × balance`), summed across accounts per token. A token
 with no entry price (BTC, deposited runes) falls back to its 24h price move
-and is marked "24h". The card never includes principals or usernames. Token images
+and is marked "24h". The card never includes principals or usernames.
+
+Token cards on the dashboard show the same two figures as chips: `24h` (price
+move) and `PNL` (unrealized, against average entry; the tooltip has the
+absolute gain). Either chip is omitted when the API has no data for it. Token images
 are fetched from the Odin CDN with CORS so they cannot taint the canvas; a
 ticker-initial fallback is drawn when an image is unavailable.

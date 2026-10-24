@@ -5,6 +5,7 @@ import {
   formatUsd,
   holdingValueMsats,
   msatsToUsd,
+  pnlPct,
   priceChangePct,
   priceToMsats,
 } from './value';
@@ -58,5 +59,16 @@ describe('priceChangePct', () => {
   it('null when day-old price unknown or zero', () => {
     expect(priceChangePct(110, null)).toBeNull();
     expect(priceChangePct(110, 0)).toBeNull();
+  });
+});
+
+describe('pnlPct', () => {
+  it('is gain over cost basis', () => {
+    expect(pnlPct(200n, 100n)).toBe(100);
+    expect(pnlPct(50n, 100n)).toBe(-50);
+  });
+  it('is null without a usable cost basis', () => {
+    expect(pnlPct(200n, null)).toBeNull();
+    expect(pnlPct(200n, 0n)).toBeNull();
   });
 });
