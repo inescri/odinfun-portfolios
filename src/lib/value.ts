@@ -54,6 +54,19 @@ export function formatUsd(usd: number): string {
   return USD_FORMAT.format(usd);
 }
 
+const USD_COMPACT_FORMAT = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+/** Like `formatUsd`, but `$1.2K` / `$3.4M` / `$1.1B` from $1,000 up, where cents stop mattering. */
+export function formatUsdCompact(usd: number): string {
+  if (!Number.isFinite(usd) || Math.abs(usd) < 1_000) return formatUsd(usd);
+  return USD_COMPACT_FORMAT.format(usd);
+}
+
 /** 24h change in percent from current and day-old price; null when unknown. */
 export function priceChangePct(price: number, price1d: number | null | undefined): number | null {
   if (price1d === null || price1d === undefined || !Number.isFinite(price1d) || price1d <= 0) {

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   formatBtc,
   formatUsd,
+  formatUsdCompact,
   holdingValueMsats,
   msatsToUsd,
   pnlPct,
@@ -48,6 +49,16 @@ describe('formatting', () => {
     expect(formatUsd(1234.567)).toBe('$1,234.57');
     expect(formatUsd(0.001)).toBe('<$0.01');
     expect(formatUsd(0)).toBe('$0.00');
+  });
+
+  it('formatUsdCompact shortens from $1,000 up', () => {
+    expect(formatUsdCompact(999.99)).toBe('$999.99');
+    expect(formatUsdCompact(1_000)).toBe('$1K');
+    expect(formatUsdCompact(1_234)).toBe('$1.2K');
+    expect(formatUsdCompact(12_345)).toBe('$12.3K');
+    expect(formatUsdCompact(3_400_000)).toBe('$3.4M');
+    expect(formatUsdCompact(1_100_000_000)).toBe('$1.1B');
+    expect(formatUsdCompact(0.001)).toBe('<$0.01');
   });
 });
 

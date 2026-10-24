@@ -201,6 +201,13 @@ describe('formatPnlAmount', () => {
     expect(formatPnlAmount(1_000n, 100_000)).toBe('+$0.00');
     expect(formatPnlAmount(-1_000_000n, null)).toBe('-0.00001 BTC');
   });
+
+  it('compacts large USD amounts on request', () => {
+    expect(formatPnlAmount(50_000_000_000n, 100_000, { compact: true })).toBe('+$50K');
+    expect(formatPnlAmount(-1_234_000_000_000n, 100_000, { compact: true })).toBe('-$1.2M');
+    expect(formatPnlAmount(50_000_000_000n, 100_000)).toBe('+$50,000.00');
+    expect(formatPnlAmount(500_000_000n, 100_000, { compact: true })).toBe('+$500.00');
+  });
 });
 
 describe('shareCardFileName', () => {

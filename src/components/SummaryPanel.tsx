@@ -37,7 +37,7 @@ export function SummaryPanel({ summary, btcUsd, lastUpdated, pendingAccounts }: 
   const pnlLabel =
     pnl === null
       ? '—'
-      : formatPnlAmount(pnl.pnlMsats, btcUsd) + (pnl.pct === null ? '' : ` (${formatPct(pnl.pct)})`);
+      : formatPnlAmount(pnl.pnlMsats, btcUsd, { compact: true }) + (pnl.pct === null ? '' : ` (${formatPct(pnl.pct)})`);
   const candles = useCandles(
     featured.map((t) => ({ tokenId: t.tokenId, seedPrice: t.price1d })),
     lastUpdated,
