@@ -42,9 +42,17 @@ pnpm build
 | -------------------- | ---------------- | -------------------------------------------------- |
 | `VITE_ODIN_ENV`      | `prod`           | `prod` / `staging` / `dev` / `local` / `legacy`    |
 | `VITE_ODIN_APP_NAME` | `Odin Portfolio` | Name shown on the Odin approval page               |
+| `VITE_SITE_URL`      | _(empty)_        | Deployed origin; enables absolute `og:image`/`og:url` |
 
 ## Units
 
 All amounts are `bigint` base units. Whole units = `balance / 10^(divisibility + decimals)`.
 BTC is 8 + 3 (1 BTC = 1e11 millisats). `token.price` is millisats per whole token, so a
 holding's value in millisats is `price * balance / 10^(divisibility + decimals)`.
+
+## Social card
+
+`public/og.png` (1200×630) is the static Open Graph / Twitter card. Source is
+`scripts/og/card.html`; regenerate with `scripts/og/render.sh` (headless Chrome).
+Set `VITE_SITE_URL` at build time so `og:image` is absolute, otherwise crawlers
+ignore it.
