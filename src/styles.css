@@ -679,7 +679,7 @@ h3 {
 }
 
 .token-amount {
-  font-size: 1.15rem;
+  font-size: 1.05rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -720,11 +720,25 @@ h3 {
   margin-right: 0.1rem;
 }
 
-.gain-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  min-width: 0;
+.value-pnl {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-top: 0.1rem;
+  white-space: nowrap;
+}
+
+.value-pnl-label {
+  font-size: 0.75em;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.pct-up-text {
+  color: #4ade80;
+}
+
+.pct-down-text {
+  color: #f87171;
 }
 
 .value-stack {
@@ -795,6 +809,10 @@ h3 {
   gap: 0.75rem;
 }
 
+.token-card-featured .token-card-head .pct {
+  margin-left: auto;
+}
+
 .featured-row {
   display: flex;
   justify-content: space-between;
@@ -804,7 +822,7 @@ h3 {
 }
 
 .featured-amount {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
 }
 
 .featured-row .value-stack {
