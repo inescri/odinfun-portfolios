@@ -30,7 +30,7 @@ export function AggregatedTokenCard({ token, btcUsd }: Props) {
         <div className="token-amount">
           {formatCompactAmount(token.balance, tokenPlaces(token), { abbreviate: true })}
         </div>
-        {change !== null ? <PctChip change={change} label="24h" title="Price change over 24h" /> : null}
+        {change !== null ? <PctChip change={change} title="Price change over 24h" /> : null}
       </div>
       <PnlLine
         valueMsats={token.pnlValueMsats ?? token.valueMsats}

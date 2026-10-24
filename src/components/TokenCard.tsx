@@ -29,7 +29,7 @@ export function TokenCard({ holding, btcUsd }: Props) {
         <div className="token-amount">
           {formatCompactAmount(holding.balance, tokenPlaces(holding), { abbreviate: true })}
         </div>
-        {change !== null ? <PctChip change={change} label="24h" title="Price change over 24h" /> : null}
+        {change !== null ? <PctChip change={change} title="Price change over 24h" /> : null}
       </div>
       <PnlLine valueMsats={holding.valueMsats} costMsats={holding.costMsats} btcUsd={btcUsd} />
       <ValueStack msats={holding.valueMsats} btcUsd={btcUsd} />

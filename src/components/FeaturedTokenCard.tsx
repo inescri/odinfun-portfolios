@@ -30,7 +30,7 @@ export function FeaturedTokenCard({ token, btcUsd, candles }: Props) {
           <div className="token-ticker">{token.ticker}</div>
           <div className="token-name muted">{token.name}</div>
         </div>
-        {change !== null ? <PctChip change={change} label="24h" title="Price change over 24h" /> : null}
+        {change !== null ? <PctChip change={change} title="Price change over 24h" /> : null}
       </div>
       <div className="featured-row">
         <div className="featured-amount-block">
