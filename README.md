@@ -42,7 +42,7 @@ pnpm build
 | -------------------- | ---------------- | -------------------------------------------------- |
 | `VITE_ODIN_ENV`      | `prod`           | `prod` / `staging` / `dev` / `local` / `legacy`    |
 | `VITE_ODIN_APP_NAME` | `Odin Portfolio` | Name shown on the Odin approval page               |
-| `VITE_SITE_URL`      | _(empty)_        | Deployed origin; enables absolute `og:image`/`og:url` |
+| `VITE_SITE_URL`      | _(empty)_        | Deployed `http(s)://` origin; enables `og:image`/`og:url` |
 
 ## Units
 
@@ -54,5 +54,8 @@ holding's value in millisats is `price * balance / 10^(divisibility + decimals)`
 
 `public/og.png` (1200×630) is the static Open Graph / Twitter card. Source is
 `scripts/og/card.html`; regenerate with `scripts/og/render.sh` (headless Chrome).
-Set `VITE_SITE_URL` at build time so `og:image` is absolute, otherwise crawlers
-ignore it.
+Title, description and `og:*` tags come from `src/brand.ts` via the plugin in
+`vite.config.ts`, in both `vite dev` and `vite build`. `og:url`, `og:image` and
+`twitter:image` need an absolute origin, so set `VITE_SITE_URL` (an `http(s)://`
+URL; anything else fails the build). Without it those tags are omitted and the
+Twitter card falls back to a text-only `summary`.

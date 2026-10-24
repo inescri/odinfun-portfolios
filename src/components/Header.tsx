@@ -1,5 +1,6 @@
 import { Plus, RefreshCw } from 'lucide-react';
 
+import { SITE_NAME } from '../brand';
 import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { AddStatus } from '../hooks/useAddAccount';
 
@@ -24,7 +25,7 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
     <header className="app-header">
       <div className="title-block">
         <h1>
-          ODIN•FUN Portfolio
+          {SITE_NAME}
           {APP_ENV !== 'prod' ? <span className="env-badge">{APP_ENV}</span> : null}
         </h1>
         {hasAccounts ? (

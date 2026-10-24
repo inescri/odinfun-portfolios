@@ -1,16 +1,17 @@
 import { defineConfig } from 'vitest/config';
 import { loadEnv } from 'vite';
-import type { Plugin } from 'vite';
+import type { HtmlTagDescriptor, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+import { DESCRIPTION, SITE_NAME } from './src/brand';
 
 const OG_IMAGE = 'og.png';
 
 /**
- * Social-card tags that need an absolute URL. Crawlers (Twitter, Facebook,
- * Discord, Telegram) do not run JS and reject relative `og:image`, so the
- * origin comes from `VITE_SITE_URL`. Without it the image tags are omitted,
- * the page falls back to the static tags in index.html and the Twitter card
- * degrades to a text-only `summary`. Runs in `vite dev` and `vite build`.
+ * Head tags built from src/brand.ts so the title, description and social
+ * cards share one copy. Crawlers (Twitter, Facebook, Discord, Telegram) do
+ * not run JS and reject a relative `og:image`, so the image/url tags need the
+ * origin from `VITE_SITE_URL`. Without it those tags are omitted and the
+ * Twitter card degrades to a text-only `summary`. Runs in dev and build.
  */
 function socialTags(siteUrl: string): Plugin {
   const origin = siteOrigin(siteUrl);
@@ -23,18 +24,27 @@ function socialTags(siteUrl: string): Plugin {
       base = config.base.startsWith('/') ? config.base : '/';
     },
     transformIndexHtml() {
+      const copy: HtmlTagDescriptor[] = [
+        { tag: 'title', children: SITE_NAME, injectTo: 'head' },
+        { tag: 'meta', attrs: { name: 'description', content: DESCRIPTION }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:type', content: 'website' }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:site_name', content: SITE_NAME }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:title', content: SITE_NAME }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:description', content: DESCRIPTION }, injectTo: 'head' },
+      ];
       if (origin === null) {
-        return [{ tag: 'meta', attrs: { name: 'twitter:card', content: 'summary' }, injectTo: 'head' }];
+        return [...copy, { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary' }, injectTo: 'head' }];
       }
       const url = `${origin}${base}`;
       const image = `${url}${OG_IMAGE}`;
       return [
+        ...copy,
         { tag: 'meta', attrs: { property: 'og:url', content: url }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:image', content: image }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:image:type', content: 'image/png' }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:image:width', content: '1200' }, injectTo: 'head' },
         { tag: 'meta', attrs: { property: 'og:image:height', content: '630' }, injectTo: 'head' },
-        { tag: 'meta', attrs: { property: 'og:image:alt', content: 'ODIN•FUN Portfolio' }, injectTo: 'head' },
+        { tag: 'meta', attrs: { property: 'og:image:alt', content: SITE_NAME }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'twitter:card', content: 'summary_large_image' }, injectTo: 'head' },
         { tag: 'meta', attrs: { name: 'twitter:image', content: image }, injectTo: 'head' },
       ];
