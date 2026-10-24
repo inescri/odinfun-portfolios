@@ -1,5 +1,4 @@
 import { RUNES_PATHS, RUNES_VIEWBOX, WORDMARK_PATHS, WORDMARK_VIEWBOX } from '../components/brand/paths';
-import { formatPct } from './value';
 import type { ShareCardData, ShareCardRow } from './shareCard';
 
 /** Open Graph card size; the canvas is drawn at `SCALE`× for crisp text. */
@@ -197,6 +196,18 @@ function drawTotal(ctx: CanvasRenderingContext2D, data: ShareCardData): void {
     ctx.fillText(fitText(ctx, data.usdLabel, 520), PAD, y);
   }
 
+  if (data.pnlLabel !== null) {
+    y += 44;
+    ctx.fillStyle = data.pnlUp ? C.success : C.danger;
+    ctx.font = font(600, 24);
+    const label = `${data.pnlUp ? '▲' : '▼'} ${data.pnlLabel}`;
+    ctx.fillText(label, PAD, y);
+    const labelW = ctx.measureText(label).width; // measure before switching font
+    ctx.fillStyle = C.subtle;
+    ctx.font = font(500, 20);
+    ctx.fillText('24h', PAD + labelW + 14, y);
+  }
+
   // Stats line.
   y = 486;
   ctx.font = font(500, 20);
@@ -309,17 +320,13 @@ function drawHoldings(
     ctx.fillStyle = C.subtle;
     ctx.font = font(500, 16);
     let sub = `${row.sharePct.toFixed(1)}% of total`;
-    if (row.changePct !== null) sub += '   ';
+    if (row.pnlLabel !== null) sub += '   ';
     ctx.fillText(sub, textX, rowTop + 44);
-    if (row.changePct !== null) {
-      const up = row.changePct >= 0;
+    if (row.pnlLabel !== null) {
+      const up = !row.pnlLabel.startsWith('-');
       ctx.fillStyle = up ? C.success : C.danger;
       ctx.font = font(600, 16);
-      ctx.fillText(
-        `${up ? '▲' : '▼'} ${formatPct(row.changePct)}`,
-        textX + ctx.measureText(sub).width,
-        rowTop + 44,
-      );
+      ctx.fillText(`${up ? '▲' : '▼'} ${row.pnlLabel}`, textX + ctx.measureText(sub).width, rowTop + 44);
     }
 
     ctx.textAlign = 'right';

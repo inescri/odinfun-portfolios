@@ -1,5 +1,5 @@
 import type { PortfolioSummary } from './aggregate';
-import { formatBtc, formatUsd, msatsToUsd, priceChangePct } from './value';
+import { formatBtc, formatPct, formatUsd, holdingValueMsats, msatsToUsd, priceChangePct, priceToMsats } from './value';
 
 /** One holding row on the share card. */
 export interface ShareCardRow {
@@ -13,7 +13,12 @@ export interface ShareCardRow {
   sharePct: number;
   /** 24h price change in percent; null when unknown (always for BTC). */
   changePct: number | null;
+  /** 24h change as shown: `+12.3%` or `+$1,234.56`; null when unknown. */
+  pnlLabel: string | null;
 }
+
+/** How 24h change is written: percent, or value in USD (BTC when no rate). */
+export type PnlMode = 'pct' | 'amount';
 
 /** Everything the renderer needs; no bigint, no DOM. */
 export interface ShareCardData {
@@ -22,6 +27,10 @@ export interface ShareCardData {
   btcUsdLabel: string | null;
   accountCount: number;
   tokenCount: number;
+  /** Portfolio 24h change over tokens with a known day-old price; null when none. */
+  pnlLabel: string | null;
+  pnlUp: boolean;
+  pnlMode: PnlMode;
   rows: ShareCardRow[];
   /** Tokens beyond `rows`, for a "+N more" line. */
   moreCount: number;
@@ -36,6 +45,8 @@ export interface ShareCardOptions {
   hideAmounts?: boolean;
   /** Holdings to list (default 5). */
   maxRows?: number;
+  /** Percent (default) or amount. Amount falls back to percent while amounts are hidden. */
+  pnlMode?: PnlMode;
   /** IANA zone for the date label; defaults to the browser's. */
   timeZone?: string;
 }
@@ -56,6 +67,14 @@ export function formatDateLabel(now: number, timeZone?: string): string {
   }).format(new Date(now));
 }
 
+/** Signed change in msats as `+$1,234.56`, or `+0.0012 BTC` when no rate is known. */
+export function formatPnlAmount(changeMsats: bigint, btcUsd: number | null): string {
+  const sign = changeMsats < 0n ? '-' : '+';
+  const abs = changeMsats < 0n ? -changeMsats : changeMsats;
+  if (btcUsd === null) return `${sign}${formatBtc(abs, { maxFractionDigits: 6 })} BTC`;
+  return `${sign}${formatUsd(msatsToUsd(abs, btcUsd))}`;
+}
+
 /** Integer-safe percentage of `part` in `whole`, two decimals. */
 export function sharePercent(part: bigint, whole: bigint): number {
   if (whole <= 0n || part <= 0n) return 0;
@@ -73,6 +92,7 @@ export function buildShareCard(
   opts: ShareCardOptions = {},
 ): ShareCardData {
   const hidden = opts.hideAmounts ?? false;
+  const pnlMode: PnlMode = hidden ? 'pct' : (opts.pnlMode ?? 'pct');
   const maxRows = opts.maxRows ?? DEFAULT_ROWS;
   const now = opts.now ?? Date.now();
 
@@ -87,14 +107,38 @@ export function buildShareCard(
     .filter((t) => t.valueMsats > 0n)
     .sort((a, b) => (a.valueMsats === b.valueMsats ? 0 : a.valueMsats > b.valueMsats ? -1 : 1));
 
-  const rows: ShareCardRow[] = byValue.slice(0, maxRows).map((t) => ({
-    tokenId: t.tokenId,
-    ticker: t.ticker,
-    valueLabel: btc(t.valueMsats, 6),
-    usdLabel: usd(t.valueMsats),
-    sharePct: sharePercent(t.valueMsats, summary.totalMsats),
-    changePct: t.tokenId === 'btc' ? null : priceChangePct(Number(t.priceMsats), t.price1d),
-  }));
+  // 24h change per token, in msats, where the API knows yesterday's price.
+  let changeTotal = 0n;
+  let baseTotal = 0n;
+  const changeOf = new Map<string, bigint>();
+  for (const t of byValue) {
+    if (t.tokenId === 'btc' || t.price1d === null || t.price1d <= 0) continue;
+    const places = t.divisibility + t.decimals;
+    const value1d = holdingValueMsats(priceToMsats(t.price1d), t.balance, places);
+    changeOf.set(t.tokenId, t.valueMsats - value1d);
+    changeTotal += t.valueMsats - value1d;
+    baseTotal += value1d;
+  }
+
+  const pnl = (changePct: number | null, changeMsats: bigint | undefined): string | null => {
+    if (pnlMode === 'amount' && changeMsats !== undefined) return formatPnlAmount(changeMsats, btcUsd);
+    return changePct === null ? null : formatPct(changePct);
+  };
+
+  const rows: ShareCardRow[] = byValue.slice(0, maxRows).map((t) => {
+    const changePct = t.tokenId === 'btc' ? null : priceChangePct(Number(t.priceMsats), t.price1d);
+    return {
+      tokenId: t.tokenId,
+      ticker: t.ticker,
+      valueLabel: btc(t.valueMsats, 6),
+      usdLabel: usd(t.valueMsats),
+      sharePct: sharePercent(t.valueMsats, summary.totalMsats),
+      changePct,
+      pnlLabel: pnl(changePct, changeOf.get(t.tokenId)),
+    };
+  });
+
+  const totalPct = baseTotal > 0n ? (Number(changeTotal) / Number(baseTotal)) * 100 : null;
 
   return {
     totalLabel: btc(summary.totalMsats, 8),
@@ -102,6 +146,9 @@ export function buildShareCard(
     btcUsdLabel: btcUsd === null ? null : formatUsd(btcUsd),
     accountCount: summary.accountCount,
     tokenCount: summary.tokenCount,
+    pnlLabel: baseTotal > 0n ? pnl(totalPct, changeTotal) : null,
+    pnlUp: changeTotal >= 0n,
+    pnlMode,
     rows,
     moreCount: Math.max(0, byValue.length - rows.length),
     dateLabel: formatDateLabel(now, opts.timeZone),

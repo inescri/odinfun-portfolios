@@ -2,7 +2,14 @@ import { describe, expect, it } from 'vitest';
 
 import { aggregate } from './aggregate';
 import type { Holding } from './holdings';
-import { AMOUNT_MASK, buildShareCard, formatDateLabel, sharePercent, shareCardFileName } from './shareCard';
+import {
+  AMOUNT_MASK,
+  buildShareCard,
+  formatDateLabel,
+  formatPnlAmount,
+  sharePercent,
+  shareCardFileName,
+} from './shareCard';
 
 const BTC = 100_000_000_000n; // 1 BTC in msats
 
@@ -27,7 +34,10 @@ const summary = aggregate([
       holding({
         tokenId: 'odin',
         ticker: 'ODIN',
-        valueMsats: BTC / 2n, // 0.5 BTC — bigger than the BTC position
+        // 0.5 BTC — bigger than the BTC position. Price up 10% on the day, so
+        // yesterday the same balance was worth 0.5 / 1.1 BTC.
+        valueMsats: BTC / 2n,
+        balance: 50_000_000_000n * 100_000_000_000n / 1100n, // (0.5 BTC / 1100 msats) whole tokens, base units
         priceMsats: 1100n,
         price1d: 1000,
       }),
@@ -84,6 +94,29 @@ describe('buildShareCard', () => {
     expect(hidden.btcUsdLabel).toBe('$100,000.00');
   });
 
+  it('writes 24h change as percent by default and as an amount on request', () => {
+    expect(card.rows[0]!.pnlLabel).toBe('+10.0%');
+    expect(card.rows[1]!.pnlLabel).toBeNull(); // BTC has no day-old price
+    // Only ODIN has a known day-old price: 0.5 BTC now vs 0.4545 BTC then.
+    expect(card.pnlLabel).toBe('+10.0%');
+    expect(card.pnlUp).toBe(true);
+
+    const amount = buildShareCard(summary, 100_000, { now: NOW, pnlMode: 'amount' });
+    expect(amount.pnlMode).toBe('amount');
+    expect(amount.rows[0]!.pnlLabel).toBe('+$4,545.45');
+    expect(amount.pnlLabel).toBe('+$4,545.45');
+
+    const noRate = buildShareCard(summary, null, { now: NOW, pnlMode: 'amount' });
+    expect(noRate.rows[0]!.pnlLabel).toBe('+0.045454 BTC');
+  });
+
+  it('falls back to percent change while amounts are hidden', () => {
+    const hidden = buildShareCard(summary, 100_000, { now: NOW, hideAmounts: true, pnlMode: 'amount' });
+    expect(hidden.pnlMode).toBe('pct');
+    expect(hidden.rows[0]!.pnlLabel).toBe('+10.0%');
+    expect(hidden.pnlLabel).toBe('+10.0%');
+  });
+
   it('omits USD when no rate is known', () => {
     const noRate = buildShareCard(summary, null, { now: NOW });
     expect(noRate.usdLabel).toBeNull();
@@ -105,6 +138,15 @@ describe('sharePercent', () => {
   it('keeps two decimals using integer math', () => {
     expect(sharePercent(1n, 3n)).toBe(33.33);
     expect(sharePercent(2n, 2n)).toBe(100);
+  });
+});
+
+describe('formatPnlAmount', () => {
+  it('signs and formats in USD, or BTC without a rate', () => {
+    expect(formatPnlAmount(-50_000_000_000n, 100_000)).toBe('-$50,000.00');
+    expect(formatPnlAmount(50_000_000_000n, 100_000)).toBe('+$50,000.00');
+    expect(formatPnlAmount(0n, 100_000)).toBe('+$0.00');
+    expect(formatPnlAmount(-1_000_000n, null)).toBe('-0.00001 BTC');
   });
 });
 

@@ -926,3 +926,67 @@ h3 {
   margin: 0;
   min-height: 1.2em;
 }
+
+.share-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.share-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.share-segment legend {
+  float: left;
+  padding: 0;
+  margin-right: 0.25rem;
+  color: var(--muted);
+}
+
+.share-segment:disabled {
+  opacity: 0.5;
+}
+
+.share-segment label {
+  cursor: pointer;
+}
+
+.share-segment input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.share-segment span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 30px;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.share-segment input:checked + span {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.share-segment input:focus-visible + span {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}

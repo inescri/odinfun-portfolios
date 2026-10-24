@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { PortfolioSummary } from '../lib/aggregate';
 import { renderShareCard } from '../lib/renderShareCard';
 import { buildShareCard, shareCardFileName } from '../lib/shareCard';
+import type { PnlMode } from '../lib/shareCard';
 import { tokenImageUrl } from '../lib/tokenImage';
 import { canCopyImage, canShareFile, copyImage, downloadBlob, shareFile } from '../lib/shareTargets';
 
@@ -29,6 +30,7 @@ const FOOTER = SITE_URL.replace(/^https?:\/\//, '').replace(/\/+$/, '');
 export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
   const [hideAmounts, setHideAmounts] = useState(false);
+  const [pnlMode, setPnlMode] = useState<PnlMode>('pct');
   const [render, setRender] = useState<Render>({ status: 'rendering' });
   const [note, setNote] = useState<string | null>(null);
 
@@ -51,7 +53,7 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
     let url: string | null = null;
     setRender({ status: 'rendering' });
     setNote(null);
-    const data = buildShareCard(summary, btcUsd, { hideAmounts });
+    const data = buildShareCard(summary, btcUsd, { hideAmounts, pnlMode });
     renderShareCard(data, { tokenImageUrl, footerText: FOOTER })
       .then((blob) => {
         if (!active) return;
@@ -69,7 +71,7 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
       active = false;
       if (url !== null) URL.revokeObjectURL(url);
     };
-  }, [open, summary, btcUsd, hideAmounts]);
+  }, [open, summary, btcUsd, hideAmounts, pnlMode]);
 
   const ready = render.status === 'ready';
   const showCopy = canCopyImage();
@@ -127,15 +129,40 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
           )}
         </div>
 
-        <label className="share-toggle">
-          <input
-            type="checkbox"
-            checked={hideAmounts}
-            onChange={(e) => setHideAmounts(e.target.checked)}
-          />
-          Hide amounts
-          <span className="subtle small">Show tokens and allocation, not the size</span>
-        </label>
+        <div className="share-options">
+          <label className="share-toggle">
+            <input
+              type="checkbox"
+              checked={hideAmounts}
+              onChange={(e) => setHideAmounts(e.target.checked)}
+            />
+            Hide amounts
+            <span className="subtle small">Show tokens and allocation, not the size</span>
+          </label>
+          <fieldset className="share-segment" disabled={hideAmounts}>
+            <legend className="small">24h change</legend>
+            <label>
+              <input
+                type="radio"
+                name="pnl-mode"
+                value="pct"
+                checked={pnlMode === 'pct'}
+                onChange={() => setPnlMode('pct')}
+              />
+              <span>%</span>
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="pnl-mode"
+                value="amount"
+                checked={pnlMode === 'amount'}
+                onChange={() => setPnlMode('amount')}
+              />
+              <span>{btcUsd === null ? 'BTC' : '$'}</span>
+            </label>
+          </fieldset>
+        </div>
 
         <div className="share-actions">
           {showShare ? (

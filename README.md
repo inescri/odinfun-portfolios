@@ -67,6 +67,9 @@ The **Share** button in the header renders the aggregated portfolio to a
 data shaped by `src/lib/shareCard.ts`). The dialog offers Download, Copy image
 and, where the Web Share API accepts files (mobile browsers, Safari), the OS
 share sheet. "Hide amounts" masks every value while keeping tokens, allocation
-and 24h change. The card never includes principals or usernames. Token images
+and 24h change. A "24h change" toggle switches between percent and amount (USD,
+or BTC when no rate is known); the amount view is unavailable while amounts
+are hidden. 24h change is computed from the API's day-old price, so BTC itself
+never shows one. The card never includes principals or usernames. Token images
 are fetched from the Odin CDN with CORS so they cannot taint the canvas; a
 ticker-initial fallback is drawn when an image is unavailable.
