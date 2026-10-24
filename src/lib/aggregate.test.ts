@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aggregate, tokenPnlMsats, tokenPnlPct } from './aggregate';
+import { aggregate, portfolioPnl, tokenPnlMsats, tokenPnlPct } from './aggregate';
 import type { Holding } from './holdings';
 
 function h(partial: Partial<Holding> & Pick<Holding, 'tokenId' | 'balance' | 'valueMsats'>): Holding {
@@ -86,5 +86,21 @@ describe('aggregate', () => {
     const bare = aggregate([{ principal: 'b', holdings: [h({ tokenId: 'foo', balance: 10n, valueMsats: 300n })] }]);
     expect(tokenPnlMsats(bare.byToken[0]!)).toBeNull();
     expect(tokenPnlPct(bare.byToken[0]!)).toBeNull();
+  });
+
+  it('sums unrealized PNL across tokens with a cost basis and ignores the rest', () => {
+    const summary = aggregate([
+      {
+        principal: 'a',
+        holdings: [
+          h({ tokenId: 'foo', balance: 10n, valueMsats: 600n, costMsats: 300n }),
+          h({ tokenId: 'bar', balance: 10n, valueMsats: 400n, costMsats: 500n }),
+          h({ tokenId: 'baz', balance: 10n, valueMsats: 1_000n }),
+        ],
+      },
+    ]);
+    expect(portfolioPnl(summary.byToken)).toEqual({ pnlMsats: 200n, pct: 25 });
+    const bare = aggregate([{ principal: 'b', holdings: [h({ tokenId: 'baz', balance: 10n, valueMsats: 300n })] }]);
+    expect(portfolioPnl(bare.byToken)).toBeNull();
   });
 });
