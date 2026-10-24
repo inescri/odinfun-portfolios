@@ -5,6 +5,7 @@ import { tokenPlaces } from '../lib/tokens';
 import { priceChangePct } from '../lib/value';
 import { CandleChart } from './CandleChart';
 import { PctChip } from './PctChip';
+import { PnlLine } from './PnlLine';
 import { TokenBackdrop } from './TokenBackdrop';
 import { TokenImage } from './TokenImage';
 import { ValueStack } from './ValueStack';
@@ -29,11 +30,18 @@ export function FeaturedTokenCard({ token, btcUsd, candles }: Props) {
           <div className="token-ticker">{token.ticker}</div>
           <div className="token-name muted">{token.name}</div>
         </div>
-        {change !== null ? <PctChip change={change} /> : null}
+        {change !== null ? <PctChip change={change} title="Price change over 24h" /> : null}
       </div>
       <div className="featured-row">
-        <div className="token-amount featured-amount">
-          {formatCompactAmount(token.balance, tokenPlaces(token), { abbreviate: true })}
+        <div className="featured-amount-block">
+          <div className="token-amount featured-amount">
+            {formatCompactAmount(token.balance, tokenPlaces(token), { abbreviate: true })}
+          </div>
+          <PnlLine
+            valueMsats={token.pnlValueMsats ?? token.valueMsats}
+            costMsats={token.costMsats}
+            btcUsd={btcUsd}
+          />
         </div>
         <ValueStack msats={token.valueMsats} btcUsd={btcUsd} />
       </div>

@@ -113,7 +113,7 @@ h3 {
 /* ── Layout ── */
 
 .app {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem 1rem 4rem;
 }
@@ -560,9 +560,10 @@ h3 {
 
 /* ── Token cards ── */
 
+/* Compact cards: four across at desktop max width (1088px inner), fewer below. */
 .token-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 0.75rem;
 }
 
@@ -657,6 +658,7 @@ h3 {
 }
 
 .token-ticker {
+  font-size: 0.9rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -664,7 +666,7 @@ h3 {
 }
 
 .token-name {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -679,7 +681,7 @@ h3 {
 }
 
 .token-amount {
-  font-size: 1.15rem;
+  font-size: 0.95rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -690,7 +692,7 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
@@ -710,6 +712,29 @@ h3 {
 .pct-glyph {
   font-size: 0.6em;
   line-height: 1;
+}
+
+.value-pnl {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: -0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.value-pnl-label {
+  font-size: 0.75em;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+.pct-up-text {
+  color: #4ade80;
+}
+
+.pct-down-text {
+  color: #f87171;
 }
 
 .value-stack {
@@ -734,6 +759,18 @@ h3 {
 
 .value-stack-lg .value-usd {
   font-size: 1rem;
+}
+
+.token-card .value-btc {
+  font-size: 0.9rem;
+}
+
+.token-card .value-usd {
+  font-size: 0.8rem;
+}
+
+.token-card .small {
+  font-size: 0.75rem;
 }
 
 .skeleton {
@@ -764,15 +801,12 @@ h3 {
 
 /* ── Featured tokens (top 3 by value, combined view) ── */
 
+/* Wide cards: as many as fit at ≥ 300px each, fewer, never squashed, on
+   narrower screens. auto-fit (not auto-fill) collapses empty tracks, so the
+   three cards always stretch across the full row. */
 .token-grid-featured {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   margin-bottom: 0.75rem;
-}
-
-@media (min-width: 720px) {
-  .token-grid-featured {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 .token-card-featured {
@@ -792,8 +826,14 @@ h3 {
   min-width: 0;
 }
 
+.featured-amount-block {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
 .featured-amount {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .featured-row .value-stack {
@@ -841,4 +881,152 @@ h3 {
   background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
+}
+
+/* ── Share dialog ── */
+
+.share-dialog {
+  width: min(92vw, 720px);
+  padding: 0;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.share-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+}
+
+.share-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.share-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.share-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.share-preview {
+  aspect-ratio: 1200 / 630;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+}
+
+.share-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.share-error {
+  color: var(--danger);
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+}
+
+.share-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.share-toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.share-note {
+  margin: 0;
+  min-height: 1.2em;
+}
+
+.share-options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.share-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.share-segment legend {
+  float: left;
+  padding: 0;
+  margin-right: 0.25rem;
+  color: var(--muted);
+}
+
+.share-segment:disabled {
+  opacity: 0.5;
+}
+
+.share-segment label {
+  cursor: pointer;
+}
+
+.share-segment input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.share-segment span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 30px;
+  padding: 0 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.share-segment input:checked + span {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+}
+
+.share-segment input:focus-visible + span {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
 }

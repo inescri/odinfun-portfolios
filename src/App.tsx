@@ -1,9 +1,10 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import { AccountCard } from './components/AccountCard';
 import { Banner } from './components/Banner';
 import { EmptyState } from './components/EmptyState';
 import { Header } from './components/Header';
+import { ShareDialog } from './components/ShareDialog';
 import { SummaryPanel } from './components/SummaryPanel';
 import { useAccounts } from './hooks/useAccounts';
 import { useAddAccount } from './hooks/useAddAccount';
@@ -15,6 +16,9 @@ export default function App() {
   const { accounts, loaded, add, remove } = useAccounts();
   const { addAccount, status, error, notice, dismiss } = useAddAccount(add);
   const { byPrincipal, btcUsd, refreshing, lastUpdated, refresh } = useHoldings(accounts);
+  const [sharing, setSharing] = useState(false);
+  const openShare = useCallback(() => setSharing(true), []);
+  const closeShare = useCallback(() => setSharing(false), []);
 
   const { summary, pending } = useMemo(() => {
     const ready: AccountHoldings[] = [];
@@ -45,8 +49,10 @@ export default function App() {
         status={status}
         onAdd={addAccount}
         onRefresh={refresh}
+        onShare={openShare}
         refreshing={refreshing}
         hasAccounts={accounts.length > 0}
+        canShare={summary.accountCount > 0}
       />
       {error !== null ? <Banner kind="error" text={error} onDismiss={dismiss} /> : null}
       {notice !== null ? <Banner kind="notice" text={notice} onDismiss={dismiss} /> : null}
@@ -63,6 +69,7 @@ export default function App() {
             lastUpdated={lastUpdated}
             pendingAccounts={pending}
           />
+          {sharing ? <ShareDialog onClose={closeShare} summary={summary} btcUsd={btcUsd} /> : null}
           <h2 className="section-title">Accounts</h2>
           <div className="accounts">
             {accounts.map((a) => (

@@ -1,10 +1,11 @@
 import { formatCompactAmount } from '../lib/amounts';
 import type { Holding } from '../lib/holdings';
 import { tokenPlaces } from '../lib/tokens';
-import { priceChangePct } from '../lib/value';
-import { PctChip } from './PctChip';
 import { TokenBackdrop } from './TokenBackdrop';
 import { TokenImage } from './TokenImage';
+import { priceChangePct } from '../lib/value';
+import { PctChip } from './PctChip';
+import { PnlLine } from './PnlLine';
 import { ValueStack } from './ValueStack';
 
 interface Props {
@@ -28,8 +29,9 @@ export function TokenCard({ holding, btcUsd }: Props) {
         <div className="token-amount">
           {formatCompactAmount(holding.balance, tokenPlaces(holding), { abbreviate: true })}
         </div>
-        {change !== null ? <PctChip change={change} /> : null}
+        {change !== null ? <PctChip change={change} title="Price change over 24h" /> : null}
       </div>
+      <PnlLine valueMsats={holding.valueMsats} costMsats={holding.costMsats} btcUsd={btcUsd} />
       <ValueStack msats={holding.valueMsats} btcUsd={btcUsd} />
     </div>
   );

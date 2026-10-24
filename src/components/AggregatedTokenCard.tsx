@@ -3,6 +3,7 @@ import { formatCompactAmount } from '../lib/amounts';
 import { tokenPlaces } from '../lib/tokens';
 import { priceChangePct } from '../lib/value';
 import { PctChip } from './PctChip';
+import { PnlLine } from './PnlLine';
 import { TokenBackdrop } from './TokenBackdrop';
 import { TokenImage } from './TokenImage';
 import { ValueStack } from './ValueStack';
@@ -29,8 +30,13 @@ export function AggregatedTokenCard({ token, btcUsd }: Props) {
         <div className="token-amount">
           {formatCompactAmount(token.balance, tokenPlaces(token), { abbreviate: true })}
         </div>
-        {change !== null ? <PctChip change={change} /> : null}
+        {change !== null ? <PctChip change={change} title="Price change over 24h" /> : null}
       </div>
+      <PnlLine
+        valueMsats={token.pnlValueMsats ?? token.valueMsats}
+        costMsats={token.costMsats}
+        btcUsd={btcUsd}
+      />
       <ValueStack msats={token.valueMsats} btcUsd={btcUsd} />
       <div className="subtle small">
         held by {n} account{n === 1 ? '' : 's'}

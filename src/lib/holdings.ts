@@ -20,6 +20,20 @@ export interface Holding {
   price1d: number | null;
   /** `priceMsats * balance / 10^places`, millisats. */
   valueMsats: bigint;
+  /**
+   * Cost basis in millisats: the API's average entry price × balance. Null
+   * when the API has no entry price (BTC, deposited runes, old snapshots).
+   * Unrealized PNL is `valueMsats - costMsats`.
+   */
+  costMsats: bigint | null;
+}
+
+/** `/user/:p/tokens` items carry fields the SDK type leaves out. */
+interface UserTokenExtras {
+  /** Average entry price, millisats per whole token. */
+  price?: number | null;
+  unrealized_pnl?: number;
+  unrealized_pnl_percent?: number;
 }
 
 export interface AccountHoldings {
@@ -42,13 +56,18 @@ function btcHolding(balance: bigint): Holding {
     priceMsats: MSATS_PER_BTC,
     price1d: null,
     valueMsats: balance,
+    costMsats: null,
   };
 }
 
-function tokenHolding(token: OdinToken, balance: bigint): Holding {
+function tokenHolding(token: OdinToken, balance: bigint, extras: UserTokenExtras): Holding {
   const divisibility = token.divisibility ?? 8;
   const decimals = token.decimals ?? 3;
   const priceMsats = priceToMsats(token.price);
+  const entryMsats = priceToMsats(extras.price);
+  const places = divisibility + decimals;
+  // A known entry price whose cost rounds to nothing is no cost basis at all.
+  const costMsats = entryMsats > 0n ? holdingValueMsats(entryMsats, balance, places) : 0n;
   return {
     tokenId: token.id,
     ticker: token.ticker,
@@ -59,7 +78,8 @@ function tokenHolding(token: OdinToken, balance: bigint): Holding {
     balance,
     priceMsats,
     price1d: token.price_1d ?? null,
-    valueMsats: holdingValueMsats(priceMsats, balance, divisibility + decimals),
+    valueMsats: holdingValueMsats(priceMsats, balance, places),
+    costMsats: costMsats > 0n ? costMsats : null,
   };
 }
 
@@ -94,7 +114,7 @@ async function fetchAllTokens(principal: string): Promise<Holding[]> {
     for (const item of res.data) {
       if (item.token.id === 'btc') continue;
       if (item.balance <= 0n) continue;
-      out.push(tokenHolding(item.token, item.balance));
+      out.push(tokenHolding(item.token, item.balance, item as UserTokenExtras));
     }
     if (res.data.length < PAGE_LIMIT || out.length >= res.count) break;
   }
@@ -117,6 +137,7 @@ export function serializeHolding(h: Holding): SerializedHolding {
     priceMsats: h.priceMsats.toString(),
     price1d: h.price1d,
     valueMsats: h.valueMsats.toString(),
+    costMsats: h.costMsats === null ? null : h.costMsats.toString(),
   };
 }
 
@@ -132,5 +153,7 @@ export function deserializeHolding(s: SerializedHolding): Holding {
     priceMsats: BigInt(s.priceMsats),
     price1d: s.price1d,
     valueMsats: BigInt(s.valueMsats),
+    // Snapshots written before cost basis existed have no field at all.
+    costMsats: s.costMsats === null || s.costMsats === undefined ? null : BigInt(s.costMsats),
   };
 }

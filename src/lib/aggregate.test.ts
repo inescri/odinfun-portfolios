@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { aggregate } from './aggregate';
+import { aggregate, tokenPnlMsats, tokenPnlPct } from './aggregate';
 import type { Holding } from './holdings';
 
 function h(partial: Partial<Holding> & Pick<Holding, 'tokenId' | 'balance' | 'valueMsats'>): Holding {
@@ -12,6 +12,7 @@ function h(partial: Partial<Holding> & Pick<Holding, 'tokenId' | 'balance' | 'va
     decimals: 3,
     priceMsats: 0n,
     price1d: null,
+    costMsats: null,
     ...partial,
   };
 }
@@ -68,5 +69,22 @@ describe('aggregate', () => {
     ]);
     expect(s.tokenCount).toBe(0);
     expect(s.perAccount.get('aaa')).toBe(0n);
+  });
+
+  it('sums cost basis only over holders that have one', () => {
+    const summary = aggregate([
+      { principal: 'a', holdings: [h({ tokenId: 'foo', balance: 10n, valueMsats: 300n, costMsats: 100n })] },
+      { principal: 'b', holdings: [h({ tokenId: 'foo', balance: 10n, valueMsats: 300n })] }, // deposited, no entry
+      { principal: 'c', holdings: [h({ tokenId: 'foo', balance: 10n, valueMsats: 300n, costMsats: 200n })] },
+    ]);
+    const foo = summary.byToken.find((t) => t.tokenId === 'foo')!;
+    expect(foo.valueMsats).toBe(900n);
+    expect(foo.costMsats).toBe(300n);
+    expect(foo.pnlValueMsats).toBe(600n);
+    expect(tokenPnlMsats(foo)).toBe(300n);
+    expect(tokenPnlPct(foo)).toBe(100);
+    const bare = aggregate([{ principal: 'b', holdings: [h({ tokenId: 'foo', balance: 10n, valueMsats: 300n })] }]);
+    expect(tokenPnlMsats(bare.byToken[0]!)).toBeNull();
+    expect(tokenPnlPct(bare.byToken[0]!)).toBeNull();
   });
 });

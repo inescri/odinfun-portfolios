@@ -53,6 +53,7 @@ describe('snapshots store', () => {
       balance: 123_456_789_012_345_678_901n,
       priceMsats: 42n,
       price1d: 40,
+      costMsats: null,
       valueMsats: 5_185_185_185n,
     };
     await putAccount({ principal: 'p1', username: null, image: null, addedAt: 1 });

@@ -17,7 +17,8 @@ token cards below.
   The BTC/USD rate comes from `GET /currency/btc`.
 - **Persistence.** IndexedDB database `odin-portfolio`: `accounts` (principal,
   username, image, addedAt) and `snapshots` (last fetched holdings per principal,
-  shown instantly on reload while the live fetch runs).
+  shown instantly on reload while the live fetch runs). Snapshots written before
+  cost basis existed load with `costMsats: null` until the next refresh.
 
 To add a second account, switch account on odin.fun first: the Odin approval
 window logs in as whoever is currently signed in there.
@@ -59,3 +60,24 @@ Title, description and `og:*` tags come from `src/brand.ts` via the plugin in
 `twitter:image` need an absolute origin, so set `VITE_SITE_URL` (an `http(s)://`
 URL; anything else fails the build). Without it those tags are omitted and the
 Twitter card falls back to a text-only `summary`.
+
+## Share card
+
+The **Share** button in the header renders the aggregated portfolio to a
+1200×630 PNG with the Canvas API, entirely in the browser (`src/lib/renderShareCard.ts`,
+data shaped by `src/lib/shareCard.ts`). The dialog offers Download, Copy image
+and, where the Web Share API accepts files (mobile browsers, Safari), the OS
+share sheet. "Hide amounts" masks every value while keeping tokens, allocation
+and gains. A "PNL" toggle switches between percent and amount (USD, or BTC
+when no rate is known); the amount view is unavailable while amounts are
+hidden. Gains are unrealized PNL against the API's average entry price
+(`price` on each `/user/:principal/tokens` item, millisats per token, stored
+as `costMsats = entry × balance`), summed across accounts per token. A token
+with no entry price (BTC, deposited runes) falls back to its 24h price move
+and is marked "24h". The card never includes principals or usernames.
+
+Token cards on the dashboard keep the `24h` price-move chip and add a PNL line
+directly under the balance: `PNL +$90,000.00 (+120.0%)` (BTC when no rate is
+known). The line is omitted when the API has no entry price for the token. Token images
+are fetched from the Odin CDN with CORS so they cannot taint the canvas; a
+ticker-initial fallback is drawn when an image is unavailable.
