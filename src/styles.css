@@ -113,7 +113,7 @@ h3 {
 /* ── Layout ── */
 
 .app {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1.5rem 1rem 4rem;
 }
@@ -560,9 +560,10 @@ h3 {
 
 /* ── Token cards ── */
 
+/* Compact cards: four across at desktop max width (1088px inner), fewer below. */
 .token-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 0.75rem;
 }
 
@@ -657,6 +658,7 @@ h3 {
 }
 
 .token-ticker {
+  font-size: 0.9rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -664,7 +666,7 @@ h3 {
 }
 
 .token-name {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -679,7 +681,7 @@ h3 {
 }
 
 .token-amount {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -690,7 +692,7 @@ h3 {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 600;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
@@ -713,7 +715,7 @@ h3 {
 }
 
 .value-pnl {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   margin-top: -0.25rem;
   white-space: nowrap;
@@ -759,6 +761,18 @@ h3 {
   font-size: 1rem;
 }
 
+.token-card .value-btc {
+  font-size: 0.9rem;
+}
+
+.token-card .value-usd {
+  font-size: 0.8rem;
+}
+
+.token-card .small {
+  font-size: 0.75rem;
+}
+
 .skeleton {
   min-height: 120px;
   background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
@@ -787,10 +801,11 @@ h3 {
 
 /* ── Featured tokens (top 3 by value, combined view) ── */
 
-/* Wide cards: as many as fit at ≥ 300px each, so three at desktop width and
-   fewer, never squashed, on narrower screens. */
+/* Wide cards: as many as fit at ≥ 300px each, fewer, never squashed, on
+   narrower screens. auto-fit (not auto-fill) collapses empty tracks, so the
+   three cards always stretch across the full row. */
 .token-grid-featured {
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   margin-bottom: 0.75rem;
 }
 
@@ -818,7 +833,7 @@ h3 {
 }
 
 .featured-amount {
-  font-size: 1.35rem;
+  font-size: 1.2rem;
 }
 
 .featured-row .value-stack {
