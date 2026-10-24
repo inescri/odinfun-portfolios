@@ -1,4 +1,4 @@
-import { ExternalLink, Lock, Plus } from 'lucide-react';
+import { ExternalLink, Plus } from 'lucide-react';
 
 import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { AddStatus } from '../hooks/useAddAccount';
@@ -12,8 +12,8 @@ interface Props {
 }
 
 /**
- * First-run screen, styled after odin.fun's landing: dim art, wordmark,
- * cyan runes, one quiet line, one call to action. No card chrome.
+ * First-run screen, styled after odin.fun's landing: wordmark, cyan runes,
+ * one quiet line, one call to action. No card chrome, no backdrop.
  */
 export function EmptyState({ onAdd, status }: Props) {
   const origin = ODIN_ORIGINS[APP_ENV];
@@ -21,7 +21,6 @@ export function EmptyState({ onAdd, status }: Props) {
   const idle = status === 'idle';
   return (
     <section className="empty-state">
-      <div className="empty-art" aria-hidden="true" />
       <div className="empty-content">
         <OdinWordmark className="empty-wordmark" />
         <OdinRunes className="empty-runes" />
@@ -38,10 +37,6 @@ export function EmptyState({ onAdd, status }: Props) {
         </div>
         <p className="empty-hint subtle small">
           To add a second wallet, switch account on {host} first, then connect again.
-        </p>
-        <p className="empty-privacy subtle small">
-          <Lock className="icon" aria-hidden="true" />
-          Stored in this browser only. Read via the ODIN•FUN public API.
         </p>
       </div>
     </section>
