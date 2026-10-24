@@ -1,5 +1,6 @@
 import { ExternalLink, Plus } from 'lucide-react';
 
+import { TAGLINE } from '../brand';
 import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { AddStatus } from '../hooks/useAddAccount';
 import { OdinRunes } from './brand/OdinRunes';
@@ -24,7 +25,7 @@ export function EmptyState({ onAdd, status }: Props) {
       <div className="empty-content">
         <OdinWordmark className="empty-wordmark" />
         <OdinRunes className="empty-runes" />
-        <h2 className="empty-tagline">Every ODIN•FUN wallet. One total.</h2>
+        <h2 className="empty-tagline">{TAGLINE}</h2>
         <div className="empty-actions">
           <button className="btn btn-primary" onClick={onAdd} disabled={!idle}>
             {idle ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
