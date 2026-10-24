@@ -315,15 +315,70 @@ h3 {
 
 /* ── Empty state ── */
 
-.empty-state {
-  text-align: center;
-  padding: 3rem 1.5rem;
+/* First paint before IndexedDB answers: same footprint as the hero, no content. */
+.hero-skeleton {
+  min-height: 260px;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hover) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
 }
 
-.empty-state p {
-  max-width: 52ch;
-  margin: 0.5rem auto 1.5rem;
+/* Modelled on odin.fun's landing: wordmark, runes, one line, one button. */
+.empty-state {
+  min-height: min(60vh, 560px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3rem 1rem;
 }
+
+.empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 560px;
+  padding: 0 1rem;
+}
+
+.empty-wordmark {
+  width: min(72vw, 418px);
+  height: auto;
+  color: var(--text);
+}
+
+.empty-runes {
+  width: min(44vw, 240px);
+  height: auto;
+  margin-top: 1.4rem;
+  color: #0ff0fc;
+}
+
+.empty-tagline {
+  margin: 2rem 0 1.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+
+.empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.empty-actions .btn {
+  text-decoration: none;
+}
+
+.empty-hint {
+  max-width: 40ch;
+  margin: 2rem 0 0;
+  line-height: 1.5;
+}
+
 
 /* ── Summary ── */
 

@@ -1,19 +1,44 @@
+import { ExternalLink, Plus } from 'lucide-react';
+
+import { APP_ENV, ODIN_ORIGINS } from '../config';
+import type { AddStatus } from '../hooks/useAddAccount';
+import { OdinRunes } from './brand/OdinRunes';
+import { OdinWordmark } from './brand/OdinWordmark';
+import { ADD_LABEL } from './Header';
+
 interface Props {
   onAdd: () => void;
-  disabled: boolean;
+  status: AddStatus;
 }
 
-export function EmptyState({ onAdd, disabled }: Props) {
+/**
+ * First-run screen, styled after odin.fun's landing: wordmark, cyan runes,
+ * one quiet line, one call to action. No card chrome, no backdrop.
+ */
+export function EmptyState({ onAdd, status }: Props) {
+  const origin = ODIN_ORIGINS[APP_ENV];
+  const host = origin.replace(/^https?:\/\//, '');
+  const idle = status === 'idle';
   return (
-    <section className="card empty-state">
-      <h2>No accounts yet</h2>
-      <p className="muted">
-        Connect an Odin login to see its BTC and token holdings here. Every principal you connect is
-        saved in this browser only (IndexedDB) and read through Odin&apos;s public API.
-      </p>
-      <button className="btn btn-primary" onClick={onAdd} disabled={disabled}>
-        + Add account
-      </button>
+    <section className="empty-state">
+      <div className="empty-content">
+        <OdinWordmark className="empty-wordmark" />
+        <OdinRunes className="empty-runes" />
+        <h2 className="empty-tagline">Every ODIN•FUN wallet. One total.</h2>
+        <div className="empty-actions">
+          <button className="btn btn-primary" onClick={onAdd} disabled={!idle}>
+            {idle ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
+            {ADD_LABEL[status]}
+          </button>
+          <a className="btn btn-ghost" href={origin} target="_blank" rel="noreferrer">
+            Open {host}
+            <ExternalLink className="icon icon-inherit" aria-hidden="true" />
+          </a>
+        </div>
+        <p className="empty-hint subtle small">
+          To add a second wallet, switch account on {host} first, then connect again.
+        </p>
+      </div>
     </section>
   );
 }
