@@ -842,3 +842,87 @@ h3 {
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
 }
+
+/* ── Share dialog ── */
+
+.share-dialog {
+  width: min(92vw, 720px);
+  padding: 0;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.share-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(2px);
+}
+
+.share-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.share-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.share-head h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.share-preview {
+  aspect-ratio: 1200 / 630;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--card-border);
+}
+
+.share-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.share-error {
+  color: var(--danger);
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+}
+
+.share-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.6rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.share-toggle input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.share-note {
+  margin: 0;
+  min-height: 1.2em;
+}

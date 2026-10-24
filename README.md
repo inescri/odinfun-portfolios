@@ -59,3 +59,14 @@ Title, description and `og:*` tags come from `src/brand.ts` via the plugin in
 `twitter:image` need an absolute origin, so set `VITE_SITE_URL` (an `http(s)://`
 URL; anything else fails the build). Without it those tags are omitted and the
 Twitter card falls back to a text-only `summary`.
+
+## Share card
+
+The **Share** button in the header renders the aggregated portfolio to a
+1200×630 PNG with the Canvas API, entirely in the browser (`src/lib/renderShareCard.ts`,
+data shaped by `src/lib/shareCard.ts`). The dialog offers Download, Copy image
+and, where the Web Share API accepts files (mobile browsers, Safari), the OS
+share sheet. "Hide amounts" masks every value while keeping tokens, allocation
+and 24h change. The card never includes principals or usernames. Token images
+are fetched from the Odin CDN with CORS so they cannot taint the canvas; a
+ticker-initial fallback is drawn when an image is unavailable.

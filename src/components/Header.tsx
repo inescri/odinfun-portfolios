@@ -1,4 +1,4 @@
-import { Plus, RefreshCw } from 'lucide-react';
+import { Plus, RefreshCw, Share2 } from 'lucide-react';
 
 import { SITE_NAME } from '../brand';
 import { APP_ENV, ODIN_ORIGINS } from '../config';
@@ -8,6 +8,7 @@ interface Props {
   status: AddStatus;
   onAdd: () => void;
   onRefresh: () => void;
+  onShare: () => void;
   refreshing: boolean;
   hasAccounts: boolean;
 }
@@ -19,7 +20,7 @@ export const ADD_LABEL: Record<AddStatus, string> = {
   saving: 'Saving…',
 };
 
-export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Props) {
+export function Header({ status, onAdd, onRefresh, onShare, refreshing, hasAccounts }: Props) {
   const origin = ODIN_ORIGINS[APP_ENV];
   return (
     <header className="app-header">
@@ -41,6 +42,10 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
       {/* With no accounts the empty state owns the only call to action. */}
       {hasAccounts ? (
         <div className="header-controls">
+          <button className="btn btn-outline" onClick={onShare}>
+            <Share2 className="icon icon-inherit" aria-hidden="true" />
+            Share
+          </button>
           <button className="btn btn-outline" onClick={onRefresh} disabled={refreshing}>
             <RefreshCw
               className={`icon icon-inherit${refreshing ? ' icon-spin' : ''}`}
