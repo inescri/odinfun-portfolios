@@ -1,3 +1,4 @@
+import { tokenPnlMsats, tokenPnlPct } from './aggregate';
 import type { PortfolioSummary } from './aggregate';
 import { formatBtc, formatPct, formatUsd, holdingValueMsats, msatsToUsd, priceChangePct, priceToMsats } from './value';
 
@@ -13,12 +14,16 @@ export interface ShareCardRow {
   sharePct: number;
   /** 24h price change in percent; null when unknown (always for BTC). */
   changePct: number | null;
-  /** 24h change as shown: `+12.3%` or `+$1,234.56`; null when unknown. */
+  /** Gain as shown: `+12.3%` or `+$1,234.56`; null when nothing is known. */
   pnlLabel: string | null;
+  /** What `pnlLabel` measures: unrealized PNL from cost basis, or 24h price move. */
+  pnlKind: PnlKind | null;
 }
 
-/** How 24h change is written: percent, or value in USD (BTC when no rate). */
+/** How a gain is written: percent, or value in USD (BTC when no rate). */
 export type PnlMode = 'pct' | 'amount';
+/** Unrealized PNL against the API's average entry price, or the 24h price move as a fallback. */
+export type PnlKind = 'pnl' | '24h';
 
 /** Everything the renderer needs; no bigint, no DOM. */
 export interface ShareCardData {
@@ -27,8 +32,13 @@ export interface ShareCardData {
   btcUsdLabel: string | null;
   accountCount: number;
   tokenCount: number;
-  /** Portfolio 24h change over tokens with a known day-old price; null when none. */
+  /**
+   * Portfolio gain. Unrealized PNL summed over positions with a cost basis;
+   * when none has one, the 24h change over tokens with a day-old price. Null
+   * when neither is known.
+   */
   pnlLabel: string | null;
+  pnlKind: PnlKind | null;
   pnlUp: boolean;
   pnlMode: PnlMode;
   rows: ShareCardRow[];
@@ -107,38 +117,62 @@ export function buildShareCard(
     .filter((t) => t.valueMsats > 0n)
     .sort((a, b) => (a.valueMsats === b.valueMsats ? 0 : a.valueMsats > b.valueMsats ? -1 : 1));
 
-  // 24h change per token, in msats, where the API knows yesterday's price.
-  let changeTotal = 0n;
-  let baseTotal = 0n;
-  const changeOf = new Map<string, bigint>();
+  // Per token: unrealized PNL where a cost basis exists, else the 24h move.
+  interface Gain {
+    kind: PnlKind;
+    msats: bigint;
+    base: bigint;
+    pct: number | null;
+  }
+  const gainOf = new Map<string, Gain>();
+  let pnlTotal = 0n;
+  let pnlBase = 0n;
+  let dayTotal = 0n;
+  let dayBase = 0n;
   for (const t of byValue) {
+    const pnl = tokenPnlMsats(t);
+    if (pnl !== null && t.costMsats !== null) {
+      gainOf.set(t.tokenId, { kind: 'pnl', msats: pnl, base: t.costMsats, pct: tokenPnlPct(t) });
+      pnlTotal += pnl;
+      pnlBase += t.costMsats;
+      continue;
+    }
     if (t.tokenId === 'btc' || t.price1d === null || t.price1d <= 0) continue;
     const places = t.divisibility + t.decimals;
     const value1d = holdingValueMsats(priceToMsats(t.price1d), t.balance, places);
-    changeOf.set(t.tokenId, t.valueMsats - value1d);
-    changeTotal += t.valueMsats - value1d;
-    baseTotal += value1d;
+    const pct = priceChangePct(Number(t.priceMsats), t.price1d);
+    gainOf.set(t.tokenId, { kind: '24h', msats: t.valueMsats - value1d, base: value1d, pct });
+    dayTotal += t.valueMsats - value1d;
+    dayBase += value1d;
   }
 
-  const pnl = (changePct: number | null, changeMsats: bigint | undefined): string | null => {
-    if (pnlMode === 'amount' && changeMsats !== undefined) return formatPnlAmount(changeMsats, btcUsd);
-    return changePct === null ? null : formatPct(changePct);
+  const label = (g: Pick<Gain, 'msats' | 'pct'> | undefined): string | null => {
+    if (g === undefined) return null;
+    if (pnlMode === 'amount') return formatPnlAmount(g.msats, btcUsd);
+    return g.pct === null ? null : formatPct(g.pct);
   };
 
   const rows: ShareCardRow[] = byValue.slice(0, maxRows).map((t) => {
-    const changePct = t.tokenId === 'btc' ? null : priceChangePct(Number(t.priceMsats), t.price1d);
+    const g = gainOf.get(t.tokenId);
     return {
       tokenId: t.tokenId,
       ticker: t.ticker,
       valueLabel: btc(t.valueMsats, 6),
       usdLabel: usd(t.valueMsats),
       sharePct: sharePercent(t.valueMsats, summary.totalMsats),
-      changePct,
-      pnlLabel: pnl(changePct, changeOf.get(t.tokenId)),
+      changePct: t.tokenId === 'btc' ? null : priceChangePct(Number(t.priceMsats), t.price1d),
+      pnlLabel: label(g),
+      pnlKind: g?.kind ?? null,
     };
   });
 
-  const totalPct = baseTotal > 0n ? (Number(changeTotal) / Number(baseTotal)) * 100 : null;
+  // Portfolio line: PNL wins whenever any position has a cost basis.
+  const total: Gain | undefined =
+    pnlBase > 0n
+      ? { kind: 'pnl', msats: pnlTotal, base: pnlBase, pct: (Number(pnlTotal) / Number(pnlBase)) * 100 }
+      : dayBase > 0n
+        ? { kind: '24h', msats: dayTotal, base: dayBase, pct: (Number(dayTotal) / Number(dayBase)) * 100 }
+        : undefined;
 
   return {
     totalLabel: btc(summary.totalMsats, 8),
@@ -146,8 +180,9 @@ export function buildShareCard(
     btcUsdLabel: btcUsd === null ? null : formatUsd(btcUsd),
     accountCount: summary.accountCount,
     tokenCount: summary.tokenCount,
-    pnlLabel: baseTotal > 0n ? pnl(totalPct, changeTotal) : null,
-    pnlUp: changeTotal >= 0n,
+    pnlLabel: label(total),
+    pnlKind: total?.kind ?? null,
+    pnlUp: total === undefined || total.msats >= 0n,
     pnlMode,
     rows,
     moreCount: Math.max(0, byValue.length - rows.length),

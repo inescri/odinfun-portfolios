@@ -22,6 +22,7 @@ function holding(partial: Partial<Holding> & Pick<Holding, 'tokenId' | 'ticker' 
     balance: 1n,
     priceMsats: 1n,
     price1d: null,
+    costMsats: null,
     ...partial,
   };
 }
@@ -40,6 +41,7 @@ const summary = aggregate([
         balance: 50_000_000_000n * 100_000_000_000n / 1100n, // (0.5 BTC / 1100 msats) whole tokens, base units
         priceMsats: 1100n,
         price1d: 1000,
+        costMsats: (BTC / 2n) * 1000n / 1100n, // bought at 1000 msats/token
       }),
       holding({ tokenId: 'zero', ticker: 'ZERO', valueMsats: 0n }),
     ],
@@ -94,11 +96,14 @@ describe('buildShareCard', () => {
     expect(hidden.btcUsdLabel).toBe('$100,000.00');
   });
 
-  it('writes 24h change as percent by default and as an amount on request', () => {
+  it('writes unrealized PNL as percent by default and as an amount on request', () => {
     expect(card.rows[0]!.pnlLabel).toBe('+10.0%');
-    expect(card.rows[1]!.pnlLabel).toBeNull(); // BTC has no day-old price
-    // Only ODIN has a known day-old price: 0.5 BTC now vs 0.4545 BTC then.
+    expect(card.rows[0]!.pnlKind).toBe('pnl');
+    expect(card.rows[1]!.pnlLabel).toBeNull(); // BTC: no cost basis, no day-old price
+    expect(card.rows[1]!.pnlKind).toBeNull();
+    // Only ODIN has a cost basis: 0.5 BTC now vs 0.4545 BTC paid.
     expect(card.pnlLabel).toBe('+10.0%');
+    expect(card.pnlKind).toBe('pnl');
     expect(card.pnlUp).toBe(true);
 
     const amount = buildShareCard(summary, 100_000, { now: NOW, pnlMode: 'amount' });
@@ -108,6 +113,47 @@ describe('buildShareCard', () => {
 
     const noRate = buildShareCard(summary, null, { now: NOW, pnlMode: 'amount' });
     expect(noRate.rows[0]!.pnlLabel).toBe('+0.045454 BTC');
+  });
+
+  it('reproduces the API sample: PLOP bought at 755, now 1494, +97.88%', () => {
+    // From a real /user/:p/tokens response: balance 898936789355962 base units,
+    // token.price 1494 msats, item.price (entry) 755 msats, unrealized_pnl_percent 97.88.
+    const balance = 898_936_789_355_962n;
+    const value = (1494n * balance) / 10n ** 11n;
+    const cost = (755n * balance) / 10n ** 11n;
+    const plop = aggregate([
+      { principal: 'p', holdings: [holding({ tokenId: 'hjte', ticker: 'PLOP', balance, valueMsats: value, priceMsats: 1494n, price1d: 1400, costMsats: cost })] },
+    ]);
+    const pct = buildShareCard(plop, 81_000, { now: NOW });
+    expect(pct.rows[0]!.pnlLabel).toBe('+97.9%');
+    expect(pct.pnlKind).toBe('pnl');
+    const amt = buildShareCard(plop, 81_000, { now: NOW, pnlMode: 'amount' });
+    // 6,643,142 msats ≈ 0.0000664 BTC ≈ $5.38 at $81k, matching the API's unrealized_pnl.
+    expect(amt.rows[0]!.pnlLabel).toBe('+$5.38');
+  });
+
+  it('falls back to the 24h move for tokens without a cost basis', () => {
+    const dayOnly = aggregate([
+      { principal: 'p', holdings: [holding({ tokenId: 'x', ticker: 'X', balance: 10n ** 11n, valueMsats: 1200n, priceMsats: 1200n, price1d: 1000 })] },
+    ]);
+    const card24 = buildShareCard(dayOnly, 100_000, { now: NOW });
+    expect(card24.rows[0]!.pnlLabel).toBe('+20.0%');
+    expect(card24.rows[0]!.pnlKind).toBe('24h');
+    expect(card24.pnlKind).toBe('24h');
+    // Mixed: a PNL position makes the portfolio line PNL and excludes the 24h-only token.
+    const mixed = aggregate([
+      {
+        principal: 'p',
+        holdings: [
+          holding({ tokenId: 'x', ticker: 'X', balance: 10n ** 11n, valueMsats: 1200n, priceMsats: 1200n, price1d: 1000 }),
+          holding({ tokenId: 'y', ticker: 'Y', balance: 10n ** 11n, valueMsats: 2000n, priceMsats: 2000n, costMsats: 1000n }),
+        ],
+      },
+    ]);
+    const cardMixed = buildShareCard(mixed, 100_000, { now: NOW });
+    expect(cardMixed.pnlKind).toBe('pnl');
+    expect(cardMixed.pnlLabel).toBe('+100.0%');
+    expect(cardMixed.rows.find((r) => r.ticker === 'X')!.pnlKind).toBe('24h');
   });
 
   it('falls back to percent change while amounts are hidden', () => {

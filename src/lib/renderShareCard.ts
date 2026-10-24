@@ -205,7 +205,7 @@ function drawTotal(ctx: CanvasRenderingContext2D, data: ShareCardData): void {
     const labelW = ctx.measureText(label).width; // measure before switching font
     ctx.fillStyle = C.subtle;
     ctx.font = font(500, 20);
-    ctx.fillText('24h', PAD + labelW + 14, y);
+    ctx.fillText(data.pnlKind === 'pnl' ? 'unrealized PNL' : '24h', PAD + labelW + 14, y);
   }
 
   // Stats line.
@@ -326,7 +326,16 @@ function drawHoldings(
       const up = !row.pnlLabel.startsWith('-');
       ctx.fillStyle = up ? C.success : C.danger;
       ctx.font = font(600, 16);
-      ctx.fillText(`${up ? '▲' : '▼'} ${row.pnlLabel}`, textX + ctx.measureText(sub).width, rowTop + 44);
+      const gain = `${up ? '▲' : '▼'} ${row.pnlLabel}`;
+      const gainX = textX + ctx.measureText(sub).width;
+      ctx.fillText(gain, gainX, rowTop + 44);
+      // A row falling back to the 24h move says so when the card is otherwise PNL.
+      if (row.pnlKind === '24h' && data.pnlKind === 'pnl') {
+        const gainW = ctx.measureText(gain).width;
+        ctx.fillStyle = C.subtle;
+        ctx.font = font(500, 13);
+        ctx.fillText('24h', gainX + gainW + 6, rowTop + 44);
+      }
     }
 
     ctx.textAlign = 'right';

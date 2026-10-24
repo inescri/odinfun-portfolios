@@ -22,6 +22,8 @@ export interface SerializedHolding {
   priceMsats: string;
   price1d: number | null;
   valueMsats: string;
+  /** Cost basis, millisats as string; null/absent when unknown. */
+  costMsats?: string | null;
 }
 
 /** Last successful holdings fetch for an account (stale-while-revalidate). */

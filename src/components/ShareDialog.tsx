@@ -140,7 +140,7 @@ export function ShareDialog({ open, onClose, summary, btcUsd }: Props) {
             <span className="subtle small">Show tokens and allocation, not the size</span>
           </label>
           <fieldset className="share-segment" disabled={hideAmounts}>
-            <legend className="small">24h change</legend>
+            <legend className="small">PNL</legend>
             <label>
               <input
                 type="radio"

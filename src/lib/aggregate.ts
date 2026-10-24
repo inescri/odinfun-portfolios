@@ -18,7 +18,27 @@ export interface AggregatedToken {
   valueMsats: bigint;
   priceMsats: bigint;
   price1d: number | null;
+  /**
+   * Cost basis and value summed over the holders whose entry price is known,
+   * so `pnlMsats = pnlValueMsats - costMsats` is exact for that portion. Null
+   * when no holder has one.
+   */
+  costMsats: bigint | null;
+  pnlValueMsats: bigint | null;
   holders: TokenHolder[];
+}
+
+/** Unrealized PNL in msats over positions with a known cost basis, or null. */
+export function tokenPnlMsats(t: Pick<AggregatedToken, 'costMsats' | 'pnlValueMsats'>): bigint | null {
+  if (t.costMsats === null || t.pnlValueMsats === null) return null;
+  return t.pnlValueMsats - t.costMsats;
+}
+
+/** Unrealized PNL as a percent of cost basis, or null. */
+export function tokenPnlPct(t: Pick<AggregatedToken, 'costMsats' | 'pnlValueMsats'>): number | null {
+  const pnl = tokenPnlMsats(t);
+  if (pnl === null || t.costMsats === null || t.costMsats <= 0n) return null;
+  return (Number(pnl) / Number(t.costMsats)) * 100;
 }
 
 export interface PortfolioSummary {
@@ -47,6 +67,8 @@ function mergeInto(map: Map<string, AggregatedToken>, principal: string, h: Hold
       valueMsats: h.valueMsats,
       priceMsats: h.priceMsats,
       price1d: h.price1d,
+      costMsats: h.costMsats,
+      pnlValueMsats: h.costMsats === null ? null : h.valueMsats,
       holders: [holder],
     });
     return;
@@ -54,6 +76,10 @@ function mergeInto(map: Map<string, AggregatedToken>, principal: string, h: Hold
   existing.balance += h.balance;
   existing.valueMsats += h.valueMsats;
   existing.holders.push(holder);
+  if (h.costMsats !== null) {
+    existing.costMsats = (existing.costMsats ?? 0n) + h.costMsats;
+    existing.pnlValueMsats = (existing.pnlValueMsats ?? 0n) + h.valueMsats;
+  }
 }
 
 /** Pure: combine per-account holdings into one portfolio view. */

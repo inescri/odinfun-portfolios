@@ -17,7 +17,8 @@ token cards below.
   The BTC/USD rate comes from `GET /currency/btc`.
 - **Persistence.** IndexedDB database `odin-portfolio`: `accounts` (principal,
   username, image, addedAt) and `snapshots` (last fetched holdings per principal,
-  shown instantly on reload while the live fetch runs).
+  shown instantly on reload while the live fetch runs). Snapshots written before
+  cost basis existed load with `costMsats: null` until the next refresh.
 
 To add a second account, switch account on odin.fun first: the Odin approval
 window logs in as whoever is currently signed in there.
@@ -67,9 +68,12 @@ The **Share** button in the header renders the aggregated portfolio to a
 data shaped by `src/lib/shareCard.ts`). The dialog offers Download, Copy image
 and, where the Web Share API accepts files (mobile browsers, Safari), the OS
 share sheet. "Hide amounts" masks every value while keeping tokens, allocation
-and 24h change. A "24h change" toggle switches between percent and amount (USD,
-or BTC when no rate is known); the amount view is unavailable while amounts
-are hidden. 24h change is computed from the API's day-old price, so BTC itself
-never shows one. The card never includes principals or usernames. Token images
+and gains. A "PNL" toggle switches between percent and amount (USD, or BTC
+when no rate is known); the amount view is unavailable while amounts are
+hidden. Gains are unrealized PNL against the API's average entry price
+(`price` on each `/user/:principal/tokens` item, millisats per token, stored
+as `costMsats = entry × balance`), summed across accounts per token. A token
+with no entry price (BTC, deposited runes) falls back to its 24h price move
+and is marked "24h". The card never includes principals or usernames. Token images
 are fetched from the Odin CDN with CORS so they cannot taint the canvas; a
 ticker-initial fallback is drawn when an image is unavailable.
