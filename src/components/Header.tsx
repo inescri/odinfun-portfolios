@@ -14,7 +14,7 @@ interface Props {
 export const ADD_LABEL: Record<AddStatus, string> = {
   restoring: 'Loading…',
   idle: 'Add account',
-  connecting: 'Waiting for Odin…',
+  connecting: 'Waiting for ODIN•FUN…',
   saving: 'Saving…',
 };
 
@@ -27,13 +27,15 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
           ODIN•FUN Portfolio
           {APP_ENV !== 'prod' ? <span className="env-badge">{APP_ENV}</span> : null}
         </h1>
-        <p className="muted small">
-          Connect as many Odin logins as you like. To add another, switch account on{' '}
-          <a href={origin} target="_blank" rel="noreferrer">
-            {origin.replace(/^https?:\/\//, '')}
-          </a>{' '}
-          first.
-        </p>
+        {hasAccounts ? (
+          <p className="muted small">
+            Connect as many ODIN•FUN logins as you like. To add another, switch account on{' '}
+            <a href={origin} target="_blank" rel="noreferrer">
+              {origin.replace(/^https?:\/\//, '')}
+            </a>{' '}
+            first.
+          </p>
+        ) : null}
       </div>
       {/* With no accounts the empty state owns the only call to action. */}
       {hasAccounts ? (

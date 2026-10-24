@@ -1,7 +1,9 @@
-import { ExternalLink, Lock, LogIn, Plus, RefreshCw, Wallet } from 'lucide-react';
+import { ExternalLink, Lock, Plus } from 'lucide-react';
 
 import { APP_ENV, ODIN_ORIGINS } from '../config';
 import type { AddStatus } from '../hooks/useAddAccount';
+import { OdinRunes } from './brand/OdinRunes';
+import { OdinWordmark } from './brand/OdinWordmark';
 import { ADD_LABEL } from './Header';
 
 interface Props {
@@ -9,63 +11,39 @@ interface Props {
   status: AddStatus;
 }
 
-const STEPS = [
-  { Icon: LogIn, text: 'Connect your Odin login' },
-  { Icon: RefreshCw, text: 'Switch account on odin.fun' },
-  { Icon: Plus, text: 'Connect again to add it' },
-] as const;
-
-/** First-run hero: one call to action, the multi-account dance, and a ghost of what you get. */
+/**
+ * First-run screen, styled after odin.fun's landing: dim art, wordmark,
+ * cyan runes, one quiet line, one call to action. No card chrome.
+ */
 export function EmptyState({ onAdd, status }: Props) {
   const origin = ODIN_ORIGINS[APP_ENV];
+  const host = origin.replace(/^https?:\/\//, '');
   const idle = status === 'idle';
   return (
-    <section className="card summary empty-state">
-      <div className="empty-tile" aria-hidden="true">
-        <Wallet className="empty-tile-icon" />
+    <section className="empty-state">
+      <div className="empty-art" aria-hidden="true" />
+      <div className="empty-content">
+        <OdinWordmark className="empty-wordmark" />
+        <OdinRunes className="empty-runes" />
+        <h2 className="empty-tagline">Every ODIN•FUN wallet. One total.</h2>
+        <div className="empty-actions">
+          <button className="btn btn-primary" onClick={onAdd} disabled={!idle}>
+            {idle ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
+            {ADD_LABEL[status]}
+          </button>
+          <a className="btn btn-ghost" href={origin} target="_blank" rel="noreferrer">
+            Open {host}
+            <ExternalLink className="icon icon-inherit" aria-hidden="true" />
+          </a>
+        </div>
+        <p className="empty-hint subtle small">
+          To add a second wallet, switch account on {host} first, then connect again.
+        </p>
+        <p className="empty-privacy subtle small">
+          <Lock className="icon" aria-hidden="true" />
+          Stored in this browser only. Read via the ODIN•FUN public API.
+        </p>
       </div>
-      <h2>All your Odin wallets, one total.</h2>
-      <p className="muted">
-        Connect a login to see its BTC and token holdings. Add as many as you like.
-      </p>
-      <div className="empty-actions">
-        <button className="btn btn-primary" onClick={onAdd} disabled={!idle}>
-          {idle ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
-          {ADD_LABEL[status]}
-        </button>
-        <a className="btn btn-ghost" href={origin} target="_blank" rel="noreferrer">
-          Open {origin.replace(/^https?:\/\//, '')}
-          <ExternalLink className="icon icon-inherit" aria-hidden="true" />
-        </a>
-      </div>
-      <ol className="empty-steps">
-        {STEPS.map(({ Icon, text }, i) => (
-          <li key={text}>
-            <span className="empty-step-num">{i + 1}</span>
-            <Icon className="icon" aria-hidden="true" />
-            <span>{text}</span>
-          </li>
-        ))}
-      </ol>
-      <div className="empty-preview" aria-hidden="true">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="token-card token-card-featured empty-preview-card">
-            <div className="token-card-head">
-              <div className="empty-ghost empty-ghost-img" />
-              <div className="token-card-id">
-                <div className="empty-ghost empty-ghost-line" style={{ width: '40%' }} />
-                <div className="empty-ghost empty-ghost-line" style={{ width: '65%' }} />
-              </div>
-            </div>
-            <div className="empty-ghost empty-ghost-line" style={{ width: '55%', height: 18 }} />
-            <div className="empty-ghost empty-ghost-chart" />
-          </div>
-        ))}
-      </div>
-      <p className="subtle small empty-privacy">
-        <Lock className="icon" aria-hidden="true" />
-        Stored in this browser only. Read via Odin&apos;s public API.
-      </p>
     </section>
   );
 }
