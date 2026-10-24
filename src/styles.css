@@ -787,15 +787,11 @@ h3 {
 
 /* ── Featured tokens (top 3 by value, combined view) ── */
 
+/* Wide cards: as many as fit at ≥ 300px each, so three at desktop width and
+   fewer, never squashed, on narrower screens. */
 .token-grid-featured {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   margin-bottom: 0.75rem;
-}
-
-@media (min-width: 720px) {
-  .token-grid-featured {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 .token-card-featured {
