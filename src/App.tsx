@@ -51,8 +51,10 @@ export default function App() {
       {error !== null ? <Banner kind="error" text={error} onDismiss={dismiss} /> : null}
       {notice !== null ? <Banner kind="notice" text={notice} onDismiss={dismiss} /> : null}
 
-      {!loaded ? null : accounts.length === 0 ? (
-        <EmptyState onAdd={addAccount} disabled={status !== 'idle'} />
+      {!loaded ? (
+        <section className="card summary hero-skeleton" aria-busy="true" aria-label="Loading" />
+      ) : accounts.length === 0 ? (
+        <EmptyState onAdd={addAccount} status={status} />
       ) : (
         <>
           <SummaryPanel

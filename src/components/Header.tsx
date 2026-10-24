@@ -11,7 +11,7 @@ interface Props {
   hasAccounts: boolean;
 }
 
-const ADD_LABEL: Record<AddStatus, string> = {
+export const ADD_LABEL: Record<AddStatus, string> = {
   restoring: 'Loading…',
   idle: 'Add account',
   connecting: 'Waiting for Odin…',
@@ -35,8 +35,9 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
           first.
         </p>
       </div>
-      <div className="header-controls">
-        {hasAccounts ? (
+      {/* With no accounts the empty state owns the only call to action. */}
+      {hasAccounts ? (
+        <div className="header-controls">
           <button className="btn btn-outline" onClick={onRefresh} disabled={refreshing}>
             <RefreshCw
               className={`icon icon-inherit${refreshing ? ' icon-spin' : ''}`}
@@ -44,12 +45,12 @@ export function Header({ status, onAdd, onRefresh, refreshing, hasAccounts }: Pr
             />
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
-        ) : null}
-        <button className="btn btn-primary" onClick={onAdd} disabled={status !== 'idle'}>
-          {status === 'idle' ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
-          {ADD_LABEL[status]}
-        </button>
-      </div>
+          <button className="btn btn-primary" onClick={onAdd} disabled={status !== 'idle'}>
+            {status === 'idle' ? <Plus className="icon icon-inherit" aria-hidden="true" /> : null}
+            {ADD_LABEL[status]}
+          </button>
+        </div>
+      ) : null}
     </header>
   );
 }
