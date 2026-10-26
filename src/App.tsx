@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 
 import { AccountCard } from './components/AccountCard';
-import { Banner } from './components/Banner';
 import { EmptyState } from './components/EmptyState';
 import { Header } from './components/Header';
 import { ShareDialog } from './components/ShareDialog';
 import { SummaryPanel } from './components/SummaryPanel';
+import { Toast } from './components/Toast';
 import { useAccounts } from './hooks/useAccounts';
 import { useAddAccount } from './hooks/useAddAccount';
 import { useHoldings } from './hooks/useHoldings';
@@ -55,8 +55,8 @@ export default function App() {
         canShare={summary.accountCount > 0}
         btcUsd={btcUsd}
       />
-      {error !== null ? <Banner kind="error" text={error} onDismiss={dismiss} /> : null}
-      {notice !== null ? <Banner kind="notice" text={notice} onDismiss={dismiss} /> : null}
+      {error !== null ? <Toast kind="error" text={error} onDismiss={dismiss} /> : null}
+      {notice !== null ? <Toast kind="notice" text={notice} onDismiss={dismiss} /> : null}
 
       {!loaded ? (
         <section className="card summary hero-skeleton" aria-busy="true" aria-label="Loading" />
