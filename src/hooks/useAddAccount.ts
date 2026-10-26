@@ -47,6 +47,9 @@ export function useAddAccount(
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Connect errors are derived from SDK state, so "dismiss" has to remember
+  // which request was closed rather than clear anything.
+  const [dismissedRequest, setDismissedRequest] = useState<string | null>(null);
   const handledRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -103,14 +106,16 @@ export function useAddAccount(
   const dismiss = useCallback(() => {
     setNotice(null);
     setSaveError(null);
-  }, []);
+    setDismissedRequest(request?.id ?? null);
+  }, [request?.id]);
 
   let status: AddStatus = 'idle';
   if (state.status === 'initializing') status = 'restoring';
   else if (saving) status = 'saving';
   else if (request?.action === 'connect' && request.status === 'pending') status = 'connecting';
 
-  const error = saveError ?? (saving ? null : connectError(request));
+  const hideConnectError = saving || (request !== null && request.id === dismissedRequest);
+  const error = saveError ?? (hideConnectError ? null : connectError(request));
 
   return { addAccount, status, error, notice, dismiss };
 }
